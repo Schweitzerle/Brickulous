@@ -1,16 +1,22 @@
 package com.example.brickulous.Api;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.AsyncTask;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.brickulous.Adapter.SetAdapter;
 import com.example.brickulous.Adapter.SetDetailAdapter;
 
@@ -114,8 +120,18 @@ public class GetSetByNumberNoAdapterData extends AsyncTask<String, String, Strin
         year.setText(String.valueOf(legoSetDataPut.getYear()));
 
         Glide.with(context)
+                .asBitmap()
                 .load(legoSetDataPut.getImageURL())
-                .into(setImage);
+                .into(new CustomTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        setImage.setImageBitmap(resource);
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+                    }
+                });
 
         numberOfPieces.setText(String.valueOf(legoSetDataPut.getNumbOfParts()));
         themeID.setText(String.valueOf(legoSetDataPut.getThemeID()));
@@ -125,9 +141,4 @@ public class GetSetByNumberNoAdapterData extends AsyncTask<String, String, Strin
         setURL.setText(Html.fromHtml(text));
     }
 
-    private void putDataToRecycler(LegoSetData legoSetData) {
-        SetDetailAdapter setDetailAdapter = new SetDetailAdapter(context, legoSetData);
-        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
-        recyclerView.setAdapter(setDetailAdapter);
-    }
 }

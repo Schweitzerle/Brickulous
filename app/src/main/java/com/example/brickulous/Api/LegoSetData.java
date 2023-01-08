@@ -23,20 +23,14 @@ public class LegoSetData {
         this.setURL = setURL;
         this.themeID = themeID;
         this.year = year;
-        bitmap = setBitmap();
     }
 
     public LegoSetData() {
 
     }
 
-    public Bitmap setBitmap() throws IOException {
-        URL imgUrl = new URL(imageURL);
-        HttpURLConnection connection = (HttpURLConnection) imgUrl.openConnection();
-        connection.setDoInput(true);
-        connection.connect();
-        InputStream input = connection.getInputStream();
-        return BitmapFactory.decodeStream(input);
+    public void setBitmap(Bitmap bitmap) {
+        this.bitmap = bitmap;
     }
 
     public Bitmap getBitmap() {

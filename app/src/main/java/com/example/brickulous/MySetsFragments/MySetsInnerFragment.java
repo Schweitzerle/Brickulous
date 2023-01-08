@@ -31,9 +31,6 @@ import java.util.Set;
 
 public class MySetsInnerFragment extends Fragment {
 
-    private float x1, x2;
-    static final int MIN_DISTANCE = 150;
-
     List<LegoSetData> favoriteList;
     RecyclerView recyclerView;
 

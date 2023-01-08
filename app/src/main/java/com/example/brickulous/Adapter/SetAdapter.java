@@ -2,21 +2,30 @@ package com.example.brickulous.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.brickulous.Api.LegoSetData;
 import com.example.brickulous.ItemDetailActivity;
 import com.example.brickulous.R;
 
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.util.List;
 
 public class SetAdapter extends RecyclerView.Adapter<SetViewHolder> {
@@ -45,15 +54,20 @@ public class SetAdapter extends RecyclerView.Adapter<SetViewHolder> {
         holder.name.setText(legoSetDataList.get(position).getName());
         holder.year.setText(String.valueOf(legoSetDataList.get(position).getYear()));
 
-        LayerDrawable layerDrawable = (LayerDrawable) ContextCompat.getDrawable(context, R.drawable.frame);
-        BitmapDrawable bitmapDrawable = new BitmapDrawable(context.getResources(), legoSetDataList.get(position).getBitmap());
-        assert layerDrawable != null;
-        layerDrawable.setDrawable(1, bitmapDrawable);
 
-        holder.image.setBackground(layerDrawable);
+        Glide.with(context)
+                .asBitmap()
+                .load(legoSetDataList.get(position).getImageURL())
+                .into(new CustomTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        holder.image.setImageBitmap(resource);
+                    }
 
-
-
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+                    }
+                });
 
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(v.getContext(), ItemDetailActivity.class);

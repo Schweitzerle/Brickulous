@@ -1,14 +1,75 @@
 <?xml version="1.0" encoding="utf-8"?>
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".Fragments.ProfileFragment">
 
-    <!-- TODO: Update blank fragment layout -->
     <TextView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:text="@string/hello_blank_fragment" />
+        android:id="@+id/sets_favored_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/sets_owned_header"
+        app:layout_constraintBottom_toTopOf="@id/sets_favored"
+        android:text="Favorisierte Sets"
+        />
 
-</FrameLayout>
+
+    <TextView
+        android:id="@+id/sets_owned_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@id/sets_favored_header"
+        app:layout_constraintEnd_toStartOf="@id/bricks_owned_in_sets_header"
+        app:layout_constraintBottom_toTopOf="@id/sets_owned"
+        android:text="Sets in Besitz"
+        />
+
+
+    <TextView
+        android:id="@+id/bricks_owned_in_sets_header"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintStart_toEndOf="@id/sets_owned_header"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/bricks_owned_in_sets"
+        android:text="Steine Anzahl in meinen Sets"
+        />
+    <TextView
+        android:id="@+id/sets_favored"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/sets_favored_header"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintEnd_toStartOf="@id/sets_owned_header"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
+
+    <TextView
+        android:id="@+id/sets_owned"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/sets_owned_header"
+        app:layout_constraintStart_toEndOf="@id/sets_favored_header"
+        app:layout_constraintEnd_toStartOf="@id/bricks_owned_in_sets_header"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
+
+    <TextView
+        android:id="@+id/bricks_owned_in_sets"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@id/bricks_owned_in_sets_header"
+        app:layout_constraintStart_toEndOf="@id/sets_owned_header"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
+
+</androidx.constraintlayout.widget.ConstraintLayout>

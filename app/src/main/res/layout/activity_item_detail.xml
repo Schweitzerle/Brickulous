@@ -24,11 +24,12 @@
                 android:id="@+id/set_image"
                 android:layout_width="match_parent"
                 android:layout_height="300dp"
-                android:background="@drawable/bg_img"
+                android:foreground="@drawable/frame_brick"
                 android:padding="20dp"
                 app:layout_constraintEnd_toEndOf="parent"
                 app:layout_constraintStart_toStartOf="parent"
-                app:layout_constraintTop_toTopOf="parent" />
+                app:layout_constraintTop_toTopOf="parent"
+                />
 
 
             <androidx.appcompat.widget.Toolbar

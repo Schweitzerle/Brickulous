@@ -1,6 +1,8 @@
 package com.example.brickulous.Api;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
 
 import androidx.recyclerview.widget.RecyclerView;
@@ -26,6 +28,7 @@ public class GetSetData extends AsyncTask<String, String, String> {
     Context context;
     String urlString;
     List<LegoSetData> legoSetData;
+    Bitmap bitmap;
 
     public GetSetData(Context context, RecyclerView recyclerView, String urlString, List<LegoSetData> legoSetData) {
         this.context = context;
@@ -48,6 +51,13 @@ public class GetSetData extends AsyncTask<String, String, String> {
 
                     InputStream is = urlConnection.getInputStream();
                     InputStreamReader isr = new InputStreamReader(is);
+
+                    URL imageUrl = new URL(urlString);
+                    HttpURLConnection connection = (HttpURLConnection) imageUrl.openConnection();
+                    connection.setDoInput(true);
+                    connection.connect();
+                    InputStream input = connection.getInputStream();
+                    bitmap = BitmapFactory.decodeStream(input);
 
                     int data = isr.read();
                     while (data != -1) {
@@ -103,7 +113,7 @@ public class GetSetData extends AsyncTask<String, String, String> {
 
     private void putDataToRecycler(List<LegoSetData> legoSetDataList) {
         SetAdapter setAdapter = new SetAdapter(context, legoSetDataList);
-        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(3 ,StaggeredGridLayoutManager.VERTICAL));
+        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2 ,StaggeredGridLayoutManager.VERTICAL));
         recyclerView.setAdapter(setAdapter);
     }
 }
