@@ -10,25 +10,36 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
+import android.widget.Spinner;
 
 import com.example.brickulous.Api.APIRequests;
 import com.example.brickulous.Api.GetSetByNumberData;
+import com.example.brickulous.Api.GetSetData;
+import com.example.brickulous.Api.GetThemesData;
 import com.example.brickulous.Api.LegoSetData;
+import com.example.brickulous.Api.ThemeData;
 import com.example.brickulous.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -44,9 +55,9 @@ public class HomeFragment extends Fragment {
     public static final String API_KEY = "?key=7c5725b2fea069238e34957b71ef40a5";
 
 
-
-
+    Spinner spinner;
     List<LegoSetData> legoSetData;
+    List<ThemeData> themes;
     RecyclerView recyclerView;
     AutoCompleteTextView setNmbr;
 
@@ -56,6 +67,7 @@ public class HomeFragment extends Fragment {
 
         View view = inflater.inflate(R.layout.fragment_home, container, false);
         initUI(view);
+        setSpinner();
         initAutocompleteClickListener();
         initSetList();
         return view;
@@ -63,9 +75,10 @@ public class HomeFragment extends Fragment {
 
     private void initUI(View view) {
         legoSetData = new ArrayList<>();
+        themes = new ArrayList<>();
         recyclerView = view.findViewById(R.id.setList);
         setNmbr = view.findViewById(R.id.edit_text);
-
+        spinner = view.findViewById(R.id.theme_spinner);
     }
 
     private void initAutocompleteClickListener() {
@@ -107,5 +120,26 @@ public class HomeFragment extends Fragment {
             return null;
         }
         return city;
+    }
+
+    private void setSpinner() {
+        GetThemesData getThemesData = new GetThemesData(getContext(), spinner, APIRequests.GET_THEMES.getURL() + API_KEY + "&page_size=1000", themes);
+        getThemesData.execute();
+
+        spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                ThemeData themeData = themes.get(position);
+                legoSetData.clear();
+                GetSetData getSetData = new GetSetData(getContext(), recyclerView, "https://rebrickable.com/api/v3/lego/sets/" +  API_KEY + "&theme_id=" + themeData.getThemeID(), legoSetData);
+                getSetData.execute();
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {
+
+            }
+        });
+
     }
 }

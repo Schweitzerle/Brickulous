@@ -31,8 +31,6 @@ import java.util.Set;
 public class FavoritesFragment extends Fragment {
 
 
-    SetAdapter setAdapter;
-    SwipeRefreshLayout swipeRefreshLayout;
     List<LegoSetData> favoriteList;
     RecyclerView recyclerView;
 
@@ -41,7 +39,6 @@ public class FavoritesFragment extends Fragment {
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_favorites, container, false);
         recyclerView = view.findViewById(R.id.favorite_list);
-        swipeRefreshLayout = view.findViewById(R.id.swipe_refresh_layout);
         favoriteList = new ArrayList<>();
 
         SharedPreferences sharedPreferences = requireContext().getSharedPreferences("favorite_sets", MODE_PRIVATE);
@@ -56,11 +53,4 @@ public class FavoritesFragment extends Fragment {
         return view;
     }
 
-    private void initRefreshListener() {
-        swipeRefreshLayout.setOnRefreshListener(() -> {
-            setAdapter.notifyDataSetChanged();
-            Toast.makeText(getContext(), getString(R.string.refresh_toast_text), Toast.LENGTH_SHORT).show();
-            swipeRefreshLayout.setRefreshing(false);
-        });
-    }
 }

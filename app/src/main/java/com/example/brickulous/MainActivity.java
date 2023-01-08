@@ -20,10 +20,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        initUI();
+        initUIj();
     }
 
-    private void initUI() {
+    private void initUIj() {
         bottomNavigationView = findViewById(R.id.bottom_navigation_bar_main);
         bottomNavigationView.setSelectedItemId(R.id.nav_home);
 

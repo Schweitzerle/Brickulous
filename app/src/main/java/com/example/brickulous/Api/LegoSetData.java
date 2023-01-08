@@ -1,11 +1,21 @@
 package com.example.brickulous.Api;
 
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
+import java.net.URL;
+
 public class LegoSetData {
 
     String setNumb, name, imageURL, setURL;
     int year, themeID, numbOfParts;
+    Bitmap bitmap;
 
-    public LegoSetData(String setNumb, String name, String imageURL, String setURL, int year, int themeID, int numbOfParts) {
+    public LegoSetData(String setNumb, String name, String imageURL, String setURL, int year, int themeID, int numbOfParts) throws IOException {
         this.setNumb = setNumb;
         this.name = name;
         this.imageURL = imageURL;
@@ -13,10 +23,24 @@ public class LegoSetData {
         this.setURL = setURL;
         this.themeID = themeID;
         this.year = year;
+        bitmap = setBitmap();
     }
 
     public LegoSetData() {
 
+    }
+
+    public Bitmap setBitmap() throws IOException {
+        URL imgUrl = new URL(imageURL);
+        HttpURLConnection connection = (HttpURLConnection) imgUrl.openConnection();
+        connection.setDoInput(true);
+        connection.connect();
+        InputStream input = connection.getInputStream();
+        return BitmapFactory.decodeStream(input);
+    }
+
+    public Bitmap getBitmap() {
+        return bitmap;
     }
 
     public int getNumbOfParts() {

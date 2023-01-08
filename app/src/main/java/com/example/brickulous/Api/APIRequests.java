@@ -7,7 +7,7 @@ public enum APIRequests {
     GET_MINIFIGS("/api/v3/lego/minifigs/"),
     GET_PARTS("/api/v3/lego/parts/"),
     GET_PART_CATEGORIES("/api/v3/lego/part_categories/"),
-    GET_THEMES("/api/v3/lego/themes/"),
+    GET_THEMES("https://rebrickable.com/api/v3/lego/themes/"),
     GET_ALL_SETS("https://rebrickable.com/api/v3/lego/sets/"),
     GET_SET("https://rebrickable.com/api/v3/lego/sets/");
 

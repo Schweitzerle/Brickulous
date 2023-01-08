@@ -2,11 +2,14 @@ package com.example.brickulous.Adapter;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.LayerDrawable;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
+import androidx.core.content.ContextCompat;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
@@ -42,9 +45,15 @@ public class SetAdapter extends RecyclerView.Adapter<SetViewHolder> {
         holder.name.setText(legoSetDataList.get(position).getName());
         holder.year.setText(String.valueOf(legoSetDataList.get(position).getYear()));
 
-        Glide.with(context)
-                .load(legoSetDataList.get(position).getImageURL())
-                .into(holder.image);
+        LayerDrawable layerDrawable = (LayerDrawable) ContextCompat.getDrawable(context, R.drawable.frame);
+        BitmapDrawable bitmapDrawable = new BitmapDrawable(context.getResources(), legoSetDataList.get(position).getBitmap());
+        assert layerDrawable != null;
+        layerDrawable.setDrawable(1, bitmapDrawable);
+
+        holder.image.setBackground(layerDrawable);
+
+
+
 
         holder.itemView.setOnClickListener(v -> {
             Intent intent = new Intent(v.getContext(), ItemDetailActivity.class);
