@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item
+        android:id="@+id/nav_my_sets"
+        android:icon="@drawable/ic_inventory_2_24"
+        android:title="@string/nav_my_sets_string"
+        />
+
+    <item
+        android:id="@+id/nav_home"
+        android:icon="@drawable/ic_home_24"
+        android:title="@string/nav_home_string"/>
+
+    <item
+        android:id="@+id/nav_profile"
+        android:icon="@drawable/ic_person_2_24"
+        android:title="@string/nav_profile_string"
+        />
+
+
+
+</menu>
