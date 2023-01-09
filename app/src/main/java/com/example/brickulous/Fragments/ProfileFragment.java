@@ -8,12 +8,15 @@ import static com.example.brickulous.Fragments.HomeFragment.API_KEY;
 import android.animation.ValueAnimator;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.activity.result.ActivityResultCallback;
@@ -22,6 +25,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
 import com.example.brickulous.Api.APIRequests;
 import com.example.brickulous.Api.GetSetByNumberData;
 import com.example.brickulous.Api.GetSetByNumberNoAdapterData;
@@ -52,11 +58,12 @@ import java.util.List;
 import java.util.Set;
 
 
-public class ProfileFragment extends Fragment implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener{
+public class ProfileFragment extends Fragment implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
 
     TextView setsOwned, setsFavored, bricksOwned, statusTextView;
     SignInButton signInButton;
     Button signOutButton;
+    ImageView profileImage;
     GoogleApiClient googleApiClient;
     private static final String TAG = "SignInActivity";
     private static final int RC_SIGN_IN = 9001;
@@ -80,6 +87,7 @@ public class ProfileFragment extends Fragment implements GoogleApiClient.OnConne
                 .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
                 .build();
 
+        profileImage = view.findViewById(R.id.user_profile);
         statusTextView = view.findViewById(R.id.status_text_view);
         signInButton = view.findViewById(R.id.sign_in_button);
         signOutButton = view.findViewById(R.id.sign_out_button);
@@ -165,61 +173,6 @@ public class ProfileFragment extends Fragment implements GoogleApiClient.OnConne
         bricksOwned = view.findViewById(R.id.bricks_owned_in_sets);
     }
 
-    private void initFirebaseAuth() {
-        ActionCodeSettings actionCodeSettings = ActionCodeSettings.newBuilder()
-                .setAndroidPackageName(
-                        /* yourPackageName= */ "...",
-                        /* installIfNotAvailable= */ true,
-                        /* minimumVersion= */ null)
-                .setHandleCodeInApp(true) // This must be set to true
-                .setUrl("https://google.com") // This URL needs to be whitelisted
-                .build();
-
-
-        // Choose authentication providers
-        List<AuthUI.IdpConfig> providers = Arrays.asList(
-                new AuthUI.IdpConfig.EmailBuilder()
-                        .enableEmailLinkSignIn()
-                        .setActionCodeSettings(actionCodeSettings)
-                        .build(),
-                new AuthUI.IdpConfig.GoogleBuilder().build());
-
-
-        // Create and launch sign-in intent
-        Intent signInIntent = AuthUI.getInstance()
-                .createSignInIntentBuilder()
-                .setAvailableProviders(providers)
-                .build();
-        signInLauncher.launch(signInIntent);
-
-
-    }
-
-    private void onSignInResult(FirebaseAuthUIAuthenticationResult result) {
-        IdpResponse response = result.getIdpResponse();
-        if (result.getResultCode() == RESULT_OK) {
-            // Successfully signed in
-            FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-            // ...
-        } else {
-            // Sign in failed. If response is null the user canceled the
-            // sign-in flow using the back button. Otherwise check
-            // response.getError().getErrorCode() and handle the error.
-            // ...
-        }
-    }
-
-
-    private final ActivityResultLauncher<Intent> signInLauncher = registerForActivityResult(
-            // See: https://developer.android.com/training/basics/intents/result
-            new FirebaseAuthUIActivityResultContract(),
-            new ActivityResultCallback<FirebaseAuthUIAuthenticationResult>() {
-                @Override
-                public void onActivityResult(FirebaseAuthUIAuthenticationResult result) {
-                    onSignInResult(result);
-                }
-            }
-    );
 
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
@@ -247,7 +200,7 @@ public class ProfileFragment extends Fragment implements GoogleApiClient.OnConne
     @Override
     public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        
+
         if (requestCode == RC_SIGN_IN) {
             GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
             handleSignInResult(result);
@@ -259,12 +212,25 @@ public class ProfileFragment extends Fragment implements GoogleApiClient.OnConne
 
         if (result.isSuccess()) {
             GoogleSignInAccount account = result.getSignInAccount();
-            statusTextView.setText("Hello, " + account.getDisplayName());
+            statusTextView.setText("Willkommen, " + account.getDisplayName());
+            Glide.with(requireContext())
+                    .asBitmap()
+                    .load(account.getPhotoUrl())
+                    .into(new CustomTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                            profileImage.setImageBitmap(resource);
+                        }
+
+                        @Override
+                        public void onLoadCleared(@Nullable Drawable placeholder) {
+                        }
+                    });
+
         } else {
 
         }
     }
-
 
 
     private void signOut() {
@@ -272,6 +238,7 @@ public class ProfileFragment extends Fragment implements GoogleApiClient.OnConne
             @Override
             public void onResult(@NonNull Status status) {
                 statusTextView.setText("Signed Out");
+                profileImage.setImageBitmap(null);
             }
         });
     }

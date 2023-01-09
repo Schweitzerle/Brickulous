@@ -1,101 +1,130 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
     tools:context=".Fragments.ProfileFragment">
 
 
+    <ImageView
+        android:id="@+id/user_profile"
+        android:layout_width="match_parent"
+        android:layout_height="200dp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        tools:srcCompat="@tools:sample/avatars"
+        android:foreground="@drawable/frame_brick"
+        />
+
+    <TextView
+        android:id="@+id/status_text_view"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:text=""
+        app:layout_constraintEnd_toStartOf="@id/lin_lay"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintBottom_toTopOf="@id/statistics"
+        app:layout_constraintTop_toBottomOf="@id/user_profile"
+        android:layout_marginHorizontal="30dp"
+        android:layout_marginTop="20dp"
+        android:textSize="30sp"
+        />
+
     <LinearLayout
         android:id="@+id/lin_lay"
-        android:layout_width="match_parent"
+        android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        android:orientation="horizontal">
+        android:orientation="vertical"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/user_profile"
+        android:layout_marginEnd="30dp"
+        android:layout_marginTop="20dp">
 
-        <TextView
-            android:id="@+id/status_text_view"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text=""/>
         <com.google.android.gms.common.SignInButton
             android:id="@+id/sign_in_button"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            />
+            android:layout_width="110dp"
+            android:layout_height="wrap_content" />
+
         <Button
             android:id="@+id/sign_out_button"
             android:layout_width="110dp"
             android:layout_height="wrap_content"
-            android:text="Sign out"/>
+            android:text="Sign out" />
     </LinearLayout>
 
-    <TextView
-        android:id="@+id/sets_favored_header"
-        android:layout_width="wrap_content"
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/statistics"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/sets_owned_header"
-        app:layout_constraintBottom_toTopOf="@id/sets_favored"
-        android:text="Favorisierte Sets"
-        />
-
-
-    <TextView
-        android:id="@+id/sets_owned_header"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toEndOf="@id/sets_favored_header"
-        app:layout_constraintEnd_toStartOf="@id/bricks_owned_in_sets_header"
-        app:layout_constraintBottom_toTopOf="@id/sets_owned"
-        android:text="Sets in Besitz"
-        />
-
-
-    <TextView
-        android:id="@+id/bricks_owned_in_sets_header"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintStart_toEndOf="@id/sets_owned_header"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toTopOf="@id/bricks_owned_in_sets"
-        android:text="Steine Anzahl in meinen Sets"
-        />
-    <TextView
-        android:id="@+id/sets_favored"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/sets_favored_header"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintEnd_toStartOf="@id/sets_owned_header"
-        app:layout_constraintBottom_toBottomOf="parent"
-        />
+        app:layout_constraintTop_toBottomOf="@id/lin_lay"
+        android:layout_marginTop="30dp">
+
+        <TextView
+            android:id="@+id/sets_favored_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Favorisierte Sets"
+            app:layout_constraintBottom_toTopOf="@id/sets_favored"
+            app:layout_constraintEnd_toStartOf="@id/sets_owned_header"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
 
-    <TextView
-        android:id="@+id/sets_owned"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/sets_owned_header"
-        app:layout_constraintStart_toEndOf="@id/sets_favored_header"
-        app:layout_constraintEnd_toStartOf="@id/bricks_owned_in_sets_header"
-        app:layout_constraintBottom_toBottomOf="parent"
-        />
+        <TextView
+            android:id="@+id/sets_owned_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Sets in Besitz"
+            app:layout_constraintBottom_toTopOf="@id/sets_owned"
+            app:layout_constraintEnd_toStartOf="@id/bricks_owned_in_sets_header"
+            app:layout_constraintStart_toEndOf="@id/sets_favored_header"
+            app:layout_constraintTop_toTopOf="parent" />
 
 
-    <TextView
-        android:id="@+id/bricks_owned_in_sets"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        app:layout_constraintTop_toBottomOf="@id/bricks_owned_in_sets_header"
-        app:layout_constraintStart_toEndOf="@id/sets_owned_header"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintBottom_toBottomOf="parent"
-        />
+        <TextView
+            android:id="@+id/bricks_owned_in_sets_header"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Steine Anzahl in meinen Sets"
+            app:layout_constraintBottom_toTopOf="@id/bricks_owned_in_sets"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/sets_owned_header"
+            app:layout_constraintTop_toTopOf="parent" />
+
+        <TextView
+            android:id="@+id/sets_favored"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/sets_owned_header"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/sets_favored_header" />
+
+
+        <TextView
+            android:id="@+id/sets_owned"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@id/bricks_owned_in_sets_header"
+            app:layout_constraintStart_toEndOf="@id/sets_favored_header"
+            app:layout_constraintTop_toBottomOf="@id/sets_owned_header" />
+
+
+        <TextView
+            android:id="@+id/bricks_owned_in_sets"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintStart_toEndOf="@id/sets_owned_header"
+            app:layout_constraintTop_toBottomOf="@id/bricks_owned_in_sets_header" />
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>
