@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.example.brickulous.Adapter.SetAdapter;
+import com.example.brickulous.Animation.MyItemAnimator;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -113,7 +114,8 @@ public class GetSetData extends AsyncTask<String, String, String> {
 
     private void putDataToRecycler(List<LegoSetData> legoSetDataList) {
         SetAdapter setAdapter = new SetAdapter(context, legoSetDataList);
-        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(2 ,StaggeredGridLayoutManager.VERTICAL));
+        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(1,StaggeredGridLayoutManager.VERTICAL));
         recyclerView.setAdapter(setAdapter);
+
     }
 }

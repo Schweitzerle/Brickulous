@@ -103,7 +103,7 @@ public class GetSetByNumberData extends AsyncTask<String, String, String> {
 
     private void putDataToRecycler(List<LegoSetData> legoSetDataList) {
         SetAdapter setAdapter = new SetAdapter(context, legoSetDataList);
-        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(3, StaggeredGridLayoutManager.VERTICAL));
+        recyclerView.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
         recyclerView.setAdapter(setAdapter);
     }
 }

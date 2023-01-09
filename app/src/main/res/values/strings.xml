@@ -10,4 +10,5 @@
     <string name="favorites_header">Deine Favortiten</string>
     <string name="refresh_toast_text">Erfolgreich aktualisiert!</string>
     <string name="my_sets_header">Meine Sammlung</string>
+    <string name="spinner_default">Themen</string>
 </resources>

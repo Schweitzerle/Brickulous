@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "170386826935",
+    "project_id": "brickulous-46986",
+    "storage_bucket": "brickulous-46986.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:170386826935:android:5dda8200f2fc5e56824f32",
+        "android_client_info": {
+          "package_name": "com.example.brickulous"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "170386826935-3k407f5mmtpkart7b94ha4niq6crtamj.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.brickulous",
+            "certificate_hash": "10e565ba8281f3ef439f82dab28f872918df55d3"
+          }
+        },
+        {
+          "client_id": "170386826935-tu5mbngf1olep6396r0lag2n879k7aku.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-C22i-Sl_aHHh_lEsoVeGqWQTfJtbcCk"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "170386826935-tu5mbngf1olep6396r0lag2n879k7aku.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

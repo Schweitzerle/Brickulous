@@ -21,6 +21,7 @@ import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Spinner;
 
+import com.example.brickulous.Animation.MyItemAnimator;
 import com.example.brickulous.Api.APIRequests;
 import com.example.brickulous.Api.GetSetByNumberData;
 import com.example.brickulous.Api.GetSetData;
@@ -83,6 +84,7 @@ public class HomeFragment extends Fragment {
 
     private void initAutocompleteClickListener() {
         setNmbr.setOnItemClickListener((adapterView, view, i, l) -> {
+            legoSetData.clear();
             String setNumb = setNmbr.getText().toString();
             String JSON_URL =  APIRequests.GET_SET.getURL() + setNumb + API_KEY;
             GetSetByNumberData getSetData = new GetSetByNumberData(requireContext(), recyclerView, JSON_URL, legoSetData);
@@ -125,7 +127,6 @@ public class HomeFragment extends Fragment {
     private void setSpinner() {
         GetThemesData getThemesData = new GetThemesData(getContext(), spinner, APIRequests.GET_THEMES.getURL() + API_KEY + "&page_size=1000", themes);
         getThemesData.execute();
-
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
@@ -140,6 +141,7 @@ public class HomeFragment extends Fragment {
 
             }
         });
+
 
     }
 }

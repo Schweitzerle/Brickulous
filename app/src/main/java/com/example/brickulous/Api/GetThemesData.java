@@ -9,6 +9,7 @@ import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.example.brickulous.Adapter.SetAdapter;
+import com.example.brickulous.R;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -110,7 +111,6 @@ public class GetThemesData extends AsyncTask<String, String, String> {
         for (ThemeData themeData: themes) {
             themeNames.add(themeData.getName());
         }
-        Collections.sort(themeNames);
         ArrayAdapter<String> adapter = new ArrayAdapter<>(context, android.R.layout.simple_spinner_item, themeNames);
         adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
         spinner.setAdapter(adapter);

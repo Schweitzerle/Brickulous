@@ -5,48 +5,54 @@
     android:layout_height="wrap_content"
     android:layout_margin="10sp">
 
-    <TextView
-        android:id="@+id/set_name"
-        android:layout_width="0dp"
-        android:layout_height="wrap_content"
-        android:layout_margin="4dp"
-        android:fontFamily="sans-serif-black"
-        android:textColor="@color/white"
-        android:textSize="18sp"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/set_image" />
-
-    <TextView
-        android:id="@+id/set_numb"
-        android:layout_width="49dp"
-        android:layout_height="16dp"
-        android:layout_margin="2dp"
-        android:textColor="@color/white"
-        android:textSize="16sp"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@id/set_name" />
-
-    <TextView
-        android:id="@+id/year"
-        android:layout_width="49dp"
-        android:layout_height="16dp"
-        android:layout_margin="2dp"
-        android:textColor="@color/white"
-        android:textSize="16sp"
-        app:layout_constraintStart_toEndOf="@id/set_numb"
-        app:layout_constraintTop_toBottomOf="@id/set_name" />
-
-
     <ImageView
         android:id="@+id/set_image"
         android:layout_width="0dp"
         android:layout_height="130dp"
-        app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
         android:foreground="@drawable/brick_frame"
-        android:padding="10dp"/>
+        android:padding="10dp"
+        app:layout_constraintWidth_percent=".5"/>
+
+    <TextView
+        android:id="@+id/set_name"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:textColor="@color/orange"
+        android:textSize="22sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/set_image"
+        app:layout_constraintTop_toTopOf="@id/set_image"
+        app:layout_constraintBottom_toTopOf="@id/set_numb"/>
+
+    <TextView
+        android:id="@+id/set_numb"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:textColor="@color/dark_orange"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/set_image"
+        app:layout_constraintTop_toBottomOf="@id/set_name"
+        app:layout_constraintBottom_toTopOf="@id/year"/>
+
+    <TextView
+        android:id="@+id/year"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="20dp"
+        android:textColor="@color/dark_orange"
+        android:textSize="20sp"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toEndOf="@id/set_image"
+        app:layout_constraintTop_toBottomOf="@id/set_numb"
+        app:layout_constraintBottom_toBottomOf="@id/set_image"/>
+
+
+
 
 
 </androidx.constraintlayout.widget.ConstraintLayout>
