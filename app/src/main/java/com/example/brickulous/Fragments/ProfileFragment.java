@@ -1,6 +1,5 @@
 package com.example.brickulous.Fragments;
 
-import static android.app.Activity.RESULT_OK;
 import static android.content.Context.MODE_PRIVATE;
 
 import static com.example.brickulous.Fragments.HomeFragment.API_KEY;
@@ -19,8 +18,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.activity.result.ActivityResultCallback;
-import androidx.activity.result.ActivityResultLauncher;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
@@ -29,17 +26,13 @@ import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
 import com.example.brickulous.Api.APIRequests;
-import com.example.brickulous.Api.GetSetByNumberData;
-import com.example.brickulous.Api.GetSetByNumberNoAdapterData;
 import com.example.brickulous.Api.GetSetByNumberPlaneData;
 import com.example.brickulous.Api.LegoSetData;
+import com.example.brickulous.LoginActivity;
 import com.example.brickulous.R;
-import com.firebase.ui.auth.AuthUI;
-import com.firebase.ui.auth.FirebaseAuthUIActivityResultContract;
-import com.firebase.ui.auth.IdpResponse;
-import com.firebase.ui.auth.data.model.FirebaseAuthUIAuthenticationResult;
 import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.auth.api.signin.GoogleSignInResult;
 import com.google.android.gms.common.ConnectionResult;
@@ -47,26 +40,26 @@ import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.common.api.GoogleApiClient;
 import com.google.android.gms.common.api.ResultCallback;
 import com.google.android.gms.common.api.Status;
-import com.google.firebase.auth.ActionCodeSettings;
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
 
-public class ProfileFragment extends Fragment implements GoogleApiClient.OnConnectionFailedListener, View.OnClickListener {
+public class ProfileFragment extends Fragment implements View.OnClickListener {
 
     TextView setsOwned, setsFavored, bricksOwned, statusTextView;
-    SignInButton signInButton;
     Button signOutButton;
     ImageView profileImage;
     GoogleApiClient googleApiClient;
-    private static final String TAG = "SignInActivity";
-    private static final int RC_SIGN_IN = 9001;
+
+    FirebaseAuth mAuth;
+    FirebaseUser mUser;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -74,28 +67,34 @@ public class ProfileFragment extends Fragment implements GoogleApiClient.OnConne
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         initUI(view);
         initSignIn(view);
-        initNuberAnimator(view);
+       // initNuberAnimator(view);
         return view;
     }
 
     private void initSignIn(View view) {
-        GoogleSignInOptions gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
-                .requestEmail()
-                .build();
-        googleApiClient = new GoogleApiClient.Builder(getContext())
-                .enableAutoManage(getActivity(), this)
-                .addApi(Auth.GOOGLE_SIGN_IN_API, gso)
-                .build();
-
         profileImage = view.findViewById(R.id.user_profile);
         statusTextView = view.findViewById(R.id.status_text_view);
-        signInButton = view.findViewById(R.id.sign_in_button);
         signOutButton = view.findViewById(R.id.sign_out_button);
 
-        signInButton.setOnClickListener(this);
         signOutButton.setOnClickListener(this);
 
+        mAuth = FirebaseAuth.getInstance();
+        mUser = mAuth.getCurrentUser();
 
+        Glide.with(requireContext())
+                .asBitmap()
+                .load(mUser.getPhotoUrl())
+                .into(new CustomTarget<Bitmap>() {
+                    @Override
+                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                        profileImage.setImageBitmap(resource);
+                    }
+
+                    @Override
+                    public void onLoadCleared(@Nullable Drawable placeholder) {
+                    }
+                });
+        statusTextView.setText(mUser.getDisplayName());
     }
 
     private void initNuberAnimator(View view) {
@@ -175,72 +174,16 @@ public class ProfileFragment extends Fragment implements GoogleApiClient.OnConne
 
 
     @Override
-    public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
-        Log.d(TAG, "onConnectionFailed:" + connectionResult);
-    }
-
-    @Override
     public void onClick(View v) {
-        switch (v.getId()) {
-            case R.id.sign_in_button:
-                signIn();
-                break;
-            case R.id.sign_out_button:
-                signOut();
-                break;
-        }
-    }
-
-    private void signIn() {
-        Intent signInIntent = Auth.GoogleSignInApi.getSignInIntent(googleApiClient);
-        startActivityForResult(signInIntent, RC_SIGN_IN);
-    }
-
-
-    @Override
-    public void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-
-        if (requestCode == RC_SIGN_IN) {
-            GoogleSignInResult result = Auth.GoogleSignInApi.getSignInResultFromIntent(data);
-            handleSignInResult(result);
-        }
-    }
-
-    private void handleSignInResult(GoogleSignInResult result) {
-        Log.d(TAG, "handleSignInResult:" + result.isSuccess());
-
-        if (result.isSuccess()) {
-            GoogleSignInAccount account = result.getSignInAccount();
-            statusTextView.setText("Willkommen, " + account.getDisplayName());
-            Glide.with(requireContext())
-                    .asBitmap()
-                    .load(account.getPhotoUrl())
-                    .into(new CustomTarget<Bitmap>() {
-                        @Override
-                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                            profileImage.setImageBitmap(resource);
-                        }
-
-                        @Override
-                        public void onLoadCleared(@Nullable Drawable placeholder) {
-                        }
-                    });
-
-        } else {
-
+        if (v.getId() == R.id.sign_out_button) {
+            signOut();
         }
     }
 
 
     private void signOut() {
-        Auth.GoogleSignInApi.signOut(googleApiClient).setResultCallback(new ResultCallback<Status>() {
-            @Override
-            public void onResult(@NonNull Status status) {
-                statusTextView.setText("Signed Out");
-                profileImage.setImageBitmap(null);
-            }
-        });
+        FirebaseAuth.getInstance().signOut();
+        startActivity(new Intent(getContext(), LoginActivity.class));
     }
 
 
