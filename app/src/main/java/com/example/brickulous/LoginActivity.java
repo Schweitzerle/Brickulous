@@ -14,6 +14,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.brickulous.Database.UserSession;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -51,8 +52,9 @@ public class LoginActivity extends AppCompatActivity {
 
         mAuth = FirebaseAuth.getInstance();
         mUser = mAuth.getCurrentUser();
+        UserSession.getInstance().setCurrentUser(mUser);
 
-        if (mUser != null) {
+        if (UserSession.getInstance().getCurrentUser() != null) {
             startActivity(new Intent(getBaseContext(), MainActivity.class));
         } else {
             initButtons();
@@ -62,12 +64,9 @@ public class LoginActivity extends AppCompatActivity {
     private void initButtons() {
         confirmButton.setOnClickListener(v -> performLogin());
 
-        googleLogin.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Intent intent= new Intent(getBaseContext(), LoginGoogleActivity.class);
-                startActivity(intent);
-            }
+        googleLogin.setOnClickListener(v -> {
+            Intent intent= new Intent(getBaseContext(), LoginGoogleActivity.class);
+            startActivity(intent);
         });
 
         newAccount.setOnClickListener(v -> startActivity(new Intent(getBaseContext(), AuthenticationActivity.class)));

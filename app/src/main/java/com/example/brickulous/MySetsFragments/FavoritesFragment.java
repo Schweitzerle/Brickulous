@@ -31,7 +31,7 @@ import java.util.Set;
 public class FavoritesFragment extends Fragment {
 
 
-    List<LegoSetData> favoriteList;
+    public static List<LegoSetData> favoriteList;
     RecyclerView recyclerView;
 
     @Override

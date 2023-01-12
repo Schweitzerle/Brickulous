@@ -28,7 +28,12 @@ import com.example.brickulous.Api.GetSetData;
 import com.example.brickulous.Api.GetThemesData;
 import com.example.brickulous.Api.LegoSetData;
 import com.example.brickulous.Api.ThemeData;
+import com.example.brickulous.Database.FirebaseDatabaseInstance;
+import com.example.brickulous.Database.User;
+import com.example.brickulous.Database.UserSession;
 import com.example.brickulous.R;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import org.json.JSONArray;
 import org.json.JSONException;

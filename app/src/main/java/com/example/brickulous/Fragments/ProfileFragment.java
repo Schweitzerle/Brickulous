@@ -28,22 +28,10 @@ import com.bumptech.glide.request.transition.Transition;
 import com.example.brickulous.Api.APIRequests;
 import com.example.brickulous.Api.GetSetByNumberPlaneData;
 import com.example.brickulous.Api.LegoSetData;
+import com.example.brickulous.Database.UserSession;
 import com.example.brickulous.LoginActivity;
 import com.example.brickulous.R;
-import com.google.android.gms.auth.api.Auth;
-import com.google.android.gms.auth.api.signin.GoogleSignIn;
-import com.google.android.gms.auth.api.signin.GoogleSignInClient;
-import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
-import com.google.android.gms.auth.api.signin.GoogleSignInResult;
-import com.google.android.gms.common.ConnectionResult;
-import com.google.android.gms.common.SignInButton;
-import com.google.android.gms.common.api.GoogleApiClient;
-import com.google.android.gms.common.api.ResultCallback;
-import com.google.android.gms.common.api.Status;
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.auth.FirebaseUser;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -56,10 +44,8 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     TextView setsOwned, setsFavored, bricksOwned, statusTextView;
     Button signOutButton;
     ImageView profileImage;
-    GoogleApiClient googleApiClient;
 
-    FirebaseAuth mAuth;
-    FirebaseUser mUser;
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -67,7 +53,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
         initUI(view);
         initSignIn(view);
-       // initNuberAnimator(view);
+        initNuberAnimator();
         return view;
     }
 
@@ -78,26 +64,25 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
         signOutButton.setOnClickListener(this);
 
-        mAuth = FirebaseAuth.getInstance();
-        mUser = mAuth.getCurrentUser();
+        if (UserSession.getInstance().getCurrentUser().getPhotoUrl() != null) {
+            Glide.with(requireContext())
+                    .asBitmap()
+                    .load(UserSession.getInstance().getCurrentUser().getPhotoUrl())
+                    .into(new CustomTarget<Bitmap>() {
+                        @Override
+                        public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                            profileImage.setImageBitmap(resource);
+                        }
 
-        Glide.with(requireContext())
-                .asBitmap()
-                .load(mUser.getPhotoUrl())
-                .into(new CustomTarget<Bitmap>() {
-                    @Override
-                    public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
-                        profileImage.setImageBitmap(resource);
-                    }
-
-                    @Override
-                    public void onLoadCleared(@Nullable Drawable placeholder) {
-                    }
-                });
-        statusTextView.setText(mUser.getDisplayName());
+                        @Override
+                        public void onLoadCleared(@Nullable Drawable placeholder) {
+                        }
+                    });
+        }
+        statusTextView.setText(UserSession.getInstance().getCurrentUser().getDisplayName());
     }
 
-    private void initNuberAnimator(View view) {
+    private void initNuberAnimator() {
         SharedPreferences sharedPreferencesFav = requireContext().getSharedPreferences("favorite_sets", MODE_PRIVATE);
         Set<String> favoriteSets = sharedPreferencesFav.getStringSet("favorite_sets", new HashSet<>());
 
@@ -129,40 +114,45 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         }
         Log.d("Sets", String.valueOf(favoriteList.size()));
 
-        ValueAnimator animatorFav = ValueAnimator.ofInt(start, endFav);
-        animatorFav.setDuration(1000);
-        animatorFav.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
+        if (endFav != 0) {
+            ValueAnimator animatorFav = ValueAnimator.ofInt(start, endFav);
+            animatorFav.setDuration(1000);
+            animatorFav.addUpdateListener(animation -> {
                 int value = (int) animation.getAnimatedValue();
                 setsFavored.setText(String.valueOf(value));
-            }
-        });
-        animatorFav.start();
+            });
+            animatorFav.start();
+        } else {
+            setsFavored.setText("0");
+        }
 
 
-        ValueAnimator animatorMy = ValueAnimator.ofInt(start, endMy);
-        animatorMy.setDuration(1000);
-        animatorMy.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
+
+        if (endMy != 0) {
+            ValueAnimator animatorMy = ValueAnimator.ofInt(start, endMy);
+            animatorMy.setDuration(1000);
+            animatorMy.addUpdateListener(animation -> {
                 int value = (int) animation.getAnimatedValue();
                 setsOwned.setText(String.valueOf(value));
-            }
-        });
-        animatorMy.start();
+            });
+            animatorMy.start();
+        } else {
+                setsOwned.setText("0");
+        }
 
 
-        ValueAnimator animatorBricks = ValueAnimator.ofInt(start, endBricks);
-        animatorBricks.setDuration(1000);
-        animatorBricks.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
+        if (endBricks != 0) {
+            ValueAnimator animatorBricks = ValueAnimator.ofInt(start, endBricks);
+            animatorBricks.setDuration(1000);
+            animatorBricks.addUpdateListener(animation -> {
                 int value = (int) animation.getAnimatedValue();
                 bricksOwned.setText(String.valueOf(value));
-            }
-        });
-        animatorBricks.start();
+            });
+            animatorBricks.start();
+        } else {
+            bricksOwned.setText("0");
+        }
+
 
     }
 

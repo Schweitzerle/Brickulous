@@ -6,12 +6,16 @@ import androidx.appcompat.app.AppCompatActivity;
 import android.app.ProgressDialog;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.brickulous.Database.FirebaseDatabaseInstance;
+import com.example.brickulous.Database.User;
+import com.example.brickulous.Database.UserSession;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthResult;
@@ -23,7 +27,7 @@ import org.w3c.dom.Text;
 public class AuthenticationActivity extends AppCompatActivity {
 
     TextView existingAccount;
-    EditText email, password, passwordConfirm;
+    EditText email, password, passwordConfirm, username;
     Button confirmButton;
     String emailValPattern = "[a-zA-Z0-9._-]+@[a-z-]+\\.+[a-z]+";
 
@@ -45,6 +49,7 @@ public class AuthenticationActivity extends AppCompatActivity {
         passwordConfirm = findViewById(R.id.password_confirm);
         confirmButton = findViewById(R.id.confirm_button);
         existingAccount = findViewById(R.id.existing_acc);
+        username = findViewById(R.id.username);
 
         progressDialog = new ProgressDialog(AuthenticationActivity.this);
 
@@ -55,19 +60,9 @@ public class AuthenticationActivity extends AppCompatActivity {
     }
 
     private void initButtons() {
-        existingAccount.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                startActivity(new Intent(getBaseContext(), MainActivity.class));
-            }
-        });
+        existingAccount.setOnClickListener(v -> startActivity(new Intent(getBaseContext(), MainActivity.class)));
 
-        confirmButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                PerformAuthentication();
-            }
-        });
+        confirmButton.setOnClickListener(v -> PerformAuthentication());
     }
 
     private void PerformAuthentication() {
@@ -88,19 +83,15 @@ public class AuthenticationActivity extends AppCompatActivity {
             progressDialog.setCanceledOnTouchOutside(false);
             progressDialog.show();
 
-            mAuth.createUserWithEmailAndPassword(emailString, passwordString).addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                @Override
-                public void onComplete(@NonNull Task<AuthResult> task) {
-                    if (task.isSuccessful()) {
-                        progressDialog.dismiss();
-                        sendUserToNextActivity();
-                        Toast.makeText(getBaseContext(), "Registrierung erfolgreich", Toast.LENGTH_SHORT).show();
-                    }
-                    else {
-                        progressDialog.dismiss();
-                        Toast.makeText(getBaseContext(), "Registrierung fehlgeschlagen:" + task.getException(), Toast.LENGTH_SHORT).show();
+            mAuth.createUserWithEmailAndPassword(emailString, passwordString).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
 
-                    }
+                    progressDialog.dismiss();
+                    Toast.makeText(AuthenticationActivity.this, "Registrierung erfolgreich", Toast.LENGTH_SHORT).show();
+                    sendUserToNextActivity();
+                } else {
+                    progressDialog.dismiss();
+                    Toast.makeText(getBaseContext(), "Registrierung fehlgeschlagen:" + task.getException(), Toast.LENGTH_SHORT).show();
                 }
             });
 
@@ -109,7 +100,7 @@ public class AuthenticationActivity extends AppCompatActivity {
 
     private void sendUserToNextActivity() {
         Intent intent = new Intent(getBaseContext(), MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK|Intent.FLAG_ACTIVITY_NEW_TASK);
+        intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TASK | Intent.FLAG_ACTIVITY_NEW_TASK);
         startActivity(intent);
     }
 }

@@ -18,7 +18,12 @@ import com.example.brickulous.Api.APIRequests;
 import com.example.brickulous.Api.GetSetByNumberData;
 import com.example.brickulous.Api.GetSetByNumberNoAdapterData;
 import com.example.brickulous.Api.LegoSetData;
+import com.example.brickulous.Database.FirebaseDatabaseInstance;
+import com.example.brickulous.Database.User;
+import com.example.brickulous.Database.UserSession;
 import com.example.brickulous.Fragments.HomeFragment;
+import com.example.brickulous.MySetsFragments.FavoritesFragment;
+import com.google.firebase.database.DatabaseReference;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -76,37 +81,33 @@ public class ItemDetailActivity extends AppCompatActivity {
             favButton.setBackgroundResource(R.drawable.ic_favorite_24);
         }
 
-        favButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                SharedPreferences sharedPreferencesFavoriteList = getSharedPreferences("favorite_sets", MODE_PRIVATE);
-                SharedPreferences.Editor editorFavList = sharedPreferencesFavoriteList.edit();
-                editorFavList.putBoolean("is_checked", isChecked);
-                editorFavList.apply();
+        favButton.setOnCheckedChangeListener((buttonView, isChecked1) -> {
+            SharedPreferences sharedPreferencesFavoriteList = getSharedPreferences("favorite_sets", MODE_PRIVATE);
+            SharedPreferences.Editor editorFavList = sharedPreferencesFavoriteList.edit();
+            editorFavList.putBoolean("is_checked", isChecked1);
+            editorFavList.apply();
 
-                SharedPreferences.Editor editor = sharedPreferencesToggleButtonState.edit();
-                editor.putBoolean("is_checked" + setNumberString, isChecked);
-                editor.apply();
+            SharedPreferences.Editor editor = sharedPreferencesToggleButtonState.edit();
+            editor.putBoolean("is_checked" + setNumberString, isChecked1);
+            editor.apply();
 
-                if (favButton.isChecked()) {
-                    favButton.setBackgroundResource(R.drawable.ic_favorite_red_24);
-                    Set<String> favoriteSets = sharedPreferencesFavoriteList.getStringSet("favorite_sets", new HashSet<>());
-                    favoriteSets.add(setNumberString);
+            if (favButton.isChecked()) {
+                favButton.setBackgroundResource(R.drawable.ic_favorite_red_24);
 
-                    SharedPreferences.Editor editor2 = sharedPreferencesFavoriteList.edit();
-                    editor2.putStringSet("favorite_sets", favoriteSets);
-                    editor2.apply();
-                } else {
-                    favButton.setBackgroundResource(R.drawable.ic_favorite_24);
-                    Set<String> favoriteSets = sharedPreferencesFavoriteList.getStringSet("favorite_sets", new HashSet<>());
-                    favoriteSets.remove(setNumberString);
 
-                    SharedPreferences.Editor editor2 = sharedPreferencesFavoriteList.edit();
-                    editor2.putStringSet("favorite_sets", favoriteSets);
-                    editor2.apply();
-                }
+                FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Favorite_List")
+                        .child(UserSession.getInstance().getCurrentUser().getUid())
+                        .setValue(setNumberString);
+
+            } else {
+                favButton.setBackgroundResource(R.drawable.ic_favorite_24);
+
+                DatabaseReference reference =  FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Favorite_List")
+                        .child(UserSession.getInstance().getCurrentUser().getUid());
+                reference.removeValue();
 
             }
+
         });
 
     }
