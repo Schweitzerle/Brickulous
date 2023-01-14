@@ -20,8 +20,10 @@ import android.widget.ArrayAdapter;
 import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Spinner;
+import android.widget.Toast;
 
 import com.example.brickulous.Animation.MyItemAnimator;
+import com.example.brickulous.Api.APIGetThemes;
 import com.example.brickulous.Api.APIRequests;
 import com.example.brickulous.Api.GetSetByNumberData;
 import com.example.brickulous.Api.GetSetData;
@@ -47,8 +49,15 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 
 
 public class HomeFragment extends Fragment {
@@ -63,9 +72,10 @@ public class HomeFragment extends Fragment {
 
     Spinner spinner;
     List<LegoSetData> legoSetData;
-    List<ThemeData> themes;
     RecyclerView recyclerView;
     AutoCompleteTextView setNmbr;
+    List<ThemeData> themeDataList = new ArrayList<>();
+
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -81,7 +91,6 @@ public class HomeFragment extends Fragment {
 
     private void initUI(View view) {
         legoSetData = new ArrayList<>();
-        themes = new ArrayList<>();
         recyclerView = view.findViewById(R.id.setList);
         setNmbr = view.findViewById(R.id.edit_text);
         spinner = view.findViewById(R.id.theme_spinner);
@@ -105,6 +114,7 @@ public class HomeFragment extends Fragment {
             for (int i = 0; i < jsonArray.length(); i++) {
                 JSONObject userData = jsonArray.getJSONObject(i);
                 setList.add(userData.getString("set_num"));
+
             }
         } catch (JSONException e) {
             e.printStackTrace();
@@ -130,15 +140,36 @@ public class HomeFragment extends Fragment {
     }
 
     private void setSpinner() {
-        GetThemesData getThemesData = new GetThemesData(getContext(), spinner, APIRequests.GET_THEMES.getURL() + API_KEY + "&page_size=1000", themes);
-        getThemesData.execute();
+        APIGetThemes getThemes = new APIGetThemes(requireContext());
+        List<String> themeNames = new ArrayList<>();
+        Map<String, Integer> themeSet = new HashMap<>();
+
+        getThemes.run(new APIGetThemes.RequestListener() {
+            @Override
+            public void onResult(List<ThemeData> themeData) {
+                themeDataList = themeData;
+                for (ThemeData themeData1: themeDataList) {
+                    themeNames.add(themeData1.getName());
+                    themeSet.put(themeData1.getName(), themeData1.getThemeID());
+                }
+                Collections.sort(themeNames);
+                ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, themeNames);
+                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                spinner.setAdapter(adapter);
+            }
+            @Override
+            public void onError() {
+                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+            }
+        });
+
         spinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                ThemeData themeData = themes.get(position);
                 legoSetData.clear();
-                GetSetData getSetData = new GetSetData(getContext(), recyclerView, "https://rebrickable.com/api/v3/lego/sets/" +  API_KEY + "&theme_id=" + themeData.getThemeID(), legoSetData);
+                GetSetData getSetData = new GetSetData(getContext(), recyclerView, "https://rebrickable.com/api/v3/lego/sets/" +  API_KEY + "&theme_id=" + themeSet.get(themeNames.get(position)), legoSetData);
                 getSetData.execute();
+
             }
 
             @Override

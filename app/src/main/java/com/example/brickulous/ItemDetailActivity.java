@@ -1,31 +1,39 @@
 package com.example.brickulous;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.RecyclerView;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
-import android.annotation.SuppressLint;
-import android.content.Intent;
 import android.content.SharedPreferences;
+import android.graphics.Bitmap;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
-import android.widget.CompoundButton;
+import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 import android.widget.ToggleButton;
 
-import com.example.brickulous.Api.APIRequests;
-import com.example.brickulous.Api.GetSetByNumberData;
-import com.example.brickulous.Api.GetSetByNumberNoAdapterData;
+import com.bumptech.glide.Glide;
+import com.bumptech.glide.request.target.CustomTarget;
+import com.bumptech.glide.request.transition.Transition;
+import com.example.brickulous.Adapter.SetAdapter;
+import com.example.brickulous.Api.APIGetSet;
 import com.example.brickulous.Api.LegoSetData;
 import com.example.brickulous.Database.FirebaseDatabaseInstance;
-import com.example.brickulous.Database.User;
 import com.example.brickulous.Database.UserSession;
-import com.example.brickulous.Fragments.HomeFragment;
-import com.example.brickulous.MySetsFragments.FavoritesFragment;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 public class ItemDetailActivity extends AppCompatActivity {
@@ -36,6 +44,8 @@ public class ItemDetailActivity extends AppCompatActivity {
     ImageView setImage;
     ToggleButton favButton, mySetsButton;
     String setNumberString;
+    LegoSetData legoSet = new LegoSetData();
+
 
 
     @Override
@@ -58,15 +68,46 @@ public class ItemDetailActivity extends AppCompatActivity {
         favButton = findViewById(R.id.favorite_toggle);
         mySetsButton = findViewById(R.id.my_set_toggle);
 
-        GetSetByNumberNoAdapterData getSetByNumberData = new GetSetByNumberNoAdapterData(getApplicationContext(), setNumber, setName, setURL, year, themeID, numberOfPieces, setImage, APIRequests.GET_SET.getURL() + setNumberString + HomeFragment.API_KEY);
-        getSetByNumberData.execute();
+        APIGetSet getSet = new APIGetSet(getBaseContext(), setNumberString);
+        getSet.run(new APIGetSet.RequestListener() {
+            @Override
+            public void onResult(LegoSetData data) {
+                legoSet = data;
+                setNumberString = data.getSetNumb();
+                setNumber.setText(data.getSetNumb());
+                setName.setText(data.getName());
+                year.setText(String.valueOf(data.getYear()));
+
+                Glide.with(getBaseContext())
+                        .asBitmap()
+                        .load(data.getImageURL())
+                        .into(new CustomTarget<Bitmap>() {
+                            @Override
+                            public void onResourceReady(@NonNull Bitmap resource, @Nullable Transition<? super Bitmap> transition) {
+                                setImage.setImageBitmap(resource);
+                            }
+
+                            @Override
+                            public void onLoadCleared(@Nullable Drawable placeholder) {
+                            }
+                        });
+
+                numberOfPieces.setText(String.valueOf(data.getNumbOfParts()));
+                themeID.setText(String.valueOf(data.getThemeID()));
+                setURL.setClickable(true);
+                setURL.setMovementMethod(LinkMovementMethod.getInstance());
+                String text = "<a href=" + data.getSetURL() + "> Link zum Set auf Rebrickable </a>";
+                setURL.setText(Html.fromHtml(text));
+            }
+
+            @Override
+            public void onError() {
+
+            }
+        });
 
         initmySetsButton();
         initFavButton();
-
-
-
-
     }
 
     private void initFavButton() {
@@ -90,27 +131,38 @@ public class ItemDetailActivity extends AppCompatActivity {
             SharedPreferences.Editor editor = sharedPreferencesToggleButtonState.edit();
             editor.putBoolean("is_checked" + setNumberString, isChecked1);
             editor.apply();
+            String legoSetID = "";
 
             if (favButton.isChecked()) {
                 favButton.setBackgroundResource(R.drawable.ic_favorite_red_24);
 
+                if (UserSession.getInstance().getCurrentUser() != null) {
+                    DatabaseReference favoritesRef = FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Users").child(UserSession.getInstance().getCurrentUser().getUid()).child("Favorites");
 
-                FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Favorite_List")
-                        .child(UserSession.getInstance().getCurrentUser().getUid())
-                        .setValue(setNumberString);
+                    DatabaseReference legoSetRef = favoritesRef.push();
+                    legoSetID = legoSetRef.getKey();
 
+                    Map<String, Object> legoSetData = new HashMap<>();
+                    legoSetData.put("Set_Number", legoSet.getSetNumb());
+                    legoSetData.put("Name", legoSet.getName());
+                    legoSetData.put("Number_Of_Bricks", legoSet.getNumbOfParts());
+                    legoSetRef.setValue(legoSetData);
+                }
             } else {
                 favButton.setBackgroundResource(R.drawable.ic_favorite_24);
 
-                DatabaseReference reference =  FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Favorite_List")
-                        .child(UserSession.getInstance().getCurrentUser().getUid());
-                reference.removeValue();
+                if (UserSession.getInstance().getCurrentUser() != null) {
+                    DatabaseReference favoritesRef = FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Users").child(UserSession.getInstance().getCurrentUser().getUid()).child("Favorites");
 
+                    DatabaseReference legoSetRef = favoritesRef.child(legoSetID);
+
+                    legoSetRef.removeValue();
+                }
             }
-
         });
-
     }
+
+
 
     private void initmySetsButton() {
         SharedPreferences sharedPreferencesToggleMyButtonState = getSharedPreferences("my_sets_button_state" + setNumberString, MODE_PRIVATE);
@@ -124,33 +176,42 @@ public class ItemDetailActivity extends AppCompatActivity {
             mySetsButton.setBackgroundResource(R.drawable.ic_inventory_2_24);
         }
 
-        mySetsButton.setOnCheckedChangeListener(new CompoundButton.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
-                SharedPreferences sharedPreferencesMyList = getSharedPreferences("my_sets", MODE_PRIVATE);
-                SharedPreferences.Editor editorMySetsList = sharedPreferencesMyList.edit();
-                editorMySetsList.putBoolean("is_checked_my_sets", isChecked);
-                editorMySetsList.apply();
+        mySetsButton.setOnCheckedChangeListener((buttonView, isChecked) -> {
+            SharedPreferences sharedPreferencesMyList = getSharedPreferences("my_sets", MODE_PRIVATE);
+            SharedPreferences.Editor editorMySetsList = sharedPreferencesMyList.edit();
+            editorMySetsList.putBoolean("is_checked_my_sets", isChecked);
+            editorMySetsList.apply();
 
-                SharedPreferences.Editor editor = sharedPreferencesToggleMyButtonState.edit();
-                editor.putBoolean("is_checked_my_sets" + setNumberString, isChecked);
-                editor.apply();
-                if (mySetsButton.isChecked()) {
-                    mySetsButton.setBackgroundResource(R.drawable.ic_baseline_inventory_2_24);
-                    Set<String> mySets = sharedPreferencesMyList.getStringSet("my_sets", new HashSet<>());
-                    mySets.add(setNumberString);
+            SharedPreferences.Editor editor = sharedPreferencesToggleMyButtonState.edit();
+            editor.putBoolean("is_checked_my_sets" + setNumberString, isChecked);
+            editor.apply();
 
-                    SharedPreferences.Editor editor2 = sharedPreferencesMyList.edit();
-                    editor2.putStringSet("my_sets", mySets);
-                    editor2.apply();
-                } else {
-                    mySetsButton.setBackgroundResource(R.drawable.ic_inventory_2_24);
-                    Set<String> favoriteSets = sharedPreferencesMyList.getStringSet("my_sets", new HashSet<>());
-                    favoriteSets.remove(setNumberString);
+            String legoSetID = "";
 
-                    SharedPreferences.Editor editor2 = sharedPreferencesMyList.edit();
-                    editor2.putStringSet("my_sets", favoriteSets);
-                    editor2.apply();
+            if (mySetsButton.isChecked()) {
+                mySetsButton.setBackgroundResource(R.drawable.ic_baseline_inventory_2_24);
+
+                if (UserSession.getInstance().getCurrentUser() != null) {
+                    DatabaseReference favoritesRef = FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Users").child(UserSession.getInstance().getCurrentUser().getUid()).child("My_Sets");
+
+                    DatabaseReference legoSetRef = favoritesRef.push();
+                    legoSetID = legoSetRef.getKey();
+
+                    Map<String, Object> legoSetData = new HashMap<>();
+                    legoSetData.put("Set_Number", legoSet.getSetNumb());
+                    legoSetData.put("Name", legoSet.getName());
+                    legoSetData.put("Number_Of_Bricks", legoSet.getNumbOfParts());
+                    legoSetRef.setValue(legoSetData);
+                }
+            } else {
+                mySetsButton.setBackgroundResource(R.drawable.ic_inventory_2_24);
+
+                if (UserSession.getInstance().getCurrentUser() != null) {
+                    DatabaseReference favoritesRef = FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Users").child(UserSession.getInstance().getCurrentUser().getUid()).child("My_Sets");
+
+                    DatabaseReference legoSetRef = favoritesRef.child(legoSetID);
+
+                    legoSetRef.removeValue();
                 }
             }
         });

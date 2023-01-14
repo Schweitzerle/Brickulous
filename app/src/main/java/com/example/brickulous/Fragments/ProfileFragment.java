@@ -17,21 +17,30 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
+import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
+import com.example.brickulous.Adapter.SetAdapter;
+import com.example.brickulous.Api.APIGetSet;
 import com.example.brickulous.Api.APIRequests;
 import com.example.brickulous.Api.GetSetByNumberPlaneData;
 import com.example.brickulous.Api.LegoSetData;
+import com.example.brickulous.Database.FirebaseDatabaseInstance;
 import com.example.brickulous.Database.UserSession;
 import com.example.brickulous.LoginActivity;
 import com.example.brickulous.R;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -45,15 +54,35 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
     Button signOutButton;
     ImageView profileImage;
 
+    private int counterFav = 0;
+    private int counterMy = 0;
+    int start = 0;
+
+    List<String> favoriteSetNames = new ArrayList<>();
+    List<LegoSetData> favoriteList = new ArrayList<>();
+
+    List<Integer> mySetNamesList = new ArrayList<>();
+    List<LegoSetData> mySetsLis = new ArrayList<>();
 
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_profile, container, false);
+
+
         initUI(view);
         initSignIn(view);
-        initNuberAnimator();
+        if (UserSession.getInstance().getCurrentUser() != null) {
+            DatabaseReference favoritesRef = FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Users").child(UserSession.getInstance().getCurrentUser().getUid()).child("Favorites");
+            getFavorites(favoritesRef, favoriteSetNames);
+        }
+
+
+        if (UserSession.getInstance().getCurrentUser() != null) {
+            DatabaseReference favoritesRef = FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Users").child(UserSession.getInstance().getCurrentUser().getUid()).child("My_Sets");
+            getMySets(favoritesRef, mySetNamesList);
+        }
         return view;
     }
 
@@ -82,38 +111,80 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         statusTextView.setText(UserSession.getInstance().getCurrentUser().getDisplayName());
     }
 
-    private void initNuberAnimator() {
-        SharedPreferences sharedPreferencesFav = requireContext().getSharedPreferences("favorite_sets", MODE_PRIVATE);
-        Set<String> favoriteSets = sharedPreferencesFav.getStringSet("favorite_sets", new HashSet<>());
+    private void getMySets(DatabaseReference myReference, final List<Integer> mySetNames) {
+        myReference.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                mySetNames.clear();
+                for (DataSnapshot legoSetSnapshot : dataSnapshot.getChildren()) {
+                    Integer legoSetName = legoSetSnapshot.child("Number_Of_Bricks").getValue(Integer.class);
+                    mySetNames.add(legoSetName);
+                }
+                initMyAnim(mySetNames);
+                initAnimators(mySetNames);
+            }
 
-        SharedPreferences sharedPreferences = requireContext().getSharedPreferences("my_sets", MODE_PRIVATE);
-        Set<String> mySets = sharedPreferences.getStringSet("my_sets", new HashSet<>());
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Handle error
+            }
+        });
+    }
 
-        List<LegoSetData> favoriteList = new ArrayList<>();
-
-        int start = 0;
-
-        int endFav = favoriteSets.size();
-
+    private void initMyAnim(List<Integer> mySets) {
         int endMy = mySets.size();
-
-        GetSetByNumberPlaneData getSetData = null;
-
-        for (String strings : mySets) {
-            String JSON_URL = APIRequests.GET_SET.getURL() + strings + API_KEY;
-            getSetData = new GetSetByNumberPlaneData(requireContext(), JSON_URL, favoriteList);
-            getSetData.execute();
+        if (endMy != 0) {
+            ValueAnimator animatorMy = ValueAnimator.ofInt(start, endMy);
+            animatorMy.setDuration(1000);
+            animatorMy.addUpdateListener(animation -> {
+                int value = (int) animation.getAnimatedValue();
+                setsOwned.setText(String.valueOf(value));
+            });
+            animatorMy.start();
+        } else {
+            setsOwned.setText("0");
         }
-        assert getSetData != null;
-        favoriteList = getSetData.getLegoSetData();
+    }
 
-        int endBricks = 0;
+    private void getFavorites(DatabaseReference favoritesRef, final List<String> favoriteSetNames) {
+        favoritesRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+                favoriteSetNames.clear();
+                for (DataSnapshot legoSetSnapshot : dataSnapshot.getChildren()) {
+                    String legoSetName = legoSetSnapshot.child("Set_Number").getValue(String.class);
+                    favoriteSetNames.add(legoSetName);
 
-        for (LegoSetData legoSetData : favoriteList) {
-            endBricks += legoSetData.getNumbOfParts();
-        }
-        Log.d("Sets", String.valueOf(favoriteList.size()));
+                }
+                for (String strings : favoriteSetNames) {
+                    APIGetSet apiGetSet = new APIGetSet(requireContext(), strings);
+                    apiGetSet.run(new APIGetSet.RequestListener() {
+                        @Override
+                        public void onResult(LegoSetData data) {
+                            favoriteList.add(data);
+                            counterFav++;
+                            if (counterFav == favoriteList.size()) {
+                                initFavAnim(favoriteSetNames);
+                            }
+                        }
 
+                        @Override
+                        public void onError() {
+                            Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                        }
+                    });
+                }
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                // Handle error
+            }
+        });
+    }
+
+    private void initFavAnim(List<String> favoriteSetNames) {
+        int endFav = favoriteSetNames.size();
         if (endFav != 0) {
             ValueAnimator animatorFav = ValueAnimator.ofInt(start, endFav);
             animatorFav.setDuration(1000);
@@ -126,20 +197,14 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
             setsFavored.setText("0");
         }
 
+    }
 
+    private void initAnimators(List<Integer> mySetBricks) {
+        int endBricks = 0;
 
-        if (endMy != 0) {
-            ValueAnimator animatorMy = ValueAnimator.ofInt(start, endMy);
-            animatorMy.setDuration(1000);
-            animatorMy.addUpdateListener(animation -> {
-                int value = (int) animation.getAnimatedValue();
-                setsOwned.setText(String.valueOf(value));
-            });
-            animatorMy.start();
-        } else {
-                setsOwned.setText("0");
+        for (Integer integer : mySetBricks) {
+            endBricks += integer;
         }
-
 
         if (endBricks != 0) {
             ValueAnimator animatorBricks = ValueAnimator.ofInt(start, endBricks);
@@ -152,8 +217,6 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
         } else {
             bricksOwned.setText("0");
         }
-
-
     }
 
     private void initUI(View view) {
