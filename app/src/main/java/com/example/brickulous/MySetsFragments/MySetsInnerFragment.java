@@ -2,6 +2,7 @@ package com.example.brickulous.MySetsFragments;
 
 import android.os.Bundle;
 
+import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
@@ -51,7 +52,7 @@ public class MySetsInnerFragment extends Fragment {
     private void getMySets(DatabaseReference myReference, final List<String> mySetNames) {
         myReference.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 mySetNames.clear();
                 for (DataSnapshot legoSetSnapshot : dataSnapshot.getChildren()) {
                     String legoSetName = legoSetSnapshot.child("Set_Number").getValue(String.class);
