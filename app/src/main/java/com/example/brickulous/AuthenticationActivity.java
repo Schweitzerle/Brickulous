@@ -18,17 +18,25 @@ import com.example.brickulous.Database.User;
 import com.example.brickulous.Database.UserSession;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textview.MaterialTextView;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
 
 import org.w3c.dom.Text;
 
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
 public class AuthenticationActivity extends AppCompatActivity {
 
-    TextView existingAccount;
-    EditText email, password, passwordConfirm, username;
-    Button confirmButton;
+    MaterialTextView existingAccount;
+    TextInputEditText email, password, passwordConfirm, username;
+    MaterialButton confirmButton;
     String emailValPattern = "[a-zA-Z0-9._-]+@[a-z-]+\\.+[a-z]+";
 
     ProgressDialog progressDialog;
@@ -86,6 +94,15 @@ public class AuthenticationActivity extends AppCompatActivity {
             mAuth.createUserWithEmailAndPassword(emailString, passwordString).addOnCompleteListener(task -> {
                 if (task.isSuccessful()) {
 
+                    FirebaseUser user = mAuth.getCurrentUser();
+                    UserSession.getInstance().setCurrentUser(user);
+                    DatabaseReference favoritesRef = FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Users").child(UserSession.getInstance().getCurrentUser().getUid()).child("User");
+
+                    DatabaseReference legoSetRef = favoritesRef.push();
+
+                    Map<String, Object> userData = new HashMap<>();
+                    userData.put("User_Name", Objects.requireNonNull(username.getText()).toString());
+                    legoSetRef.setValue(userData);
                     progressDialog.dismiss();
                     Toast.makeText(AuthenticationActivity.this, "Registrierung erfolgreich", Toast.LENGTH_SHORT).show();
                     sendUserToNextActivity();

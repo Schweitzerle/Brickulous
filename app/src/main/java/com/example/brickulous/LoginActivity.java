@@ -15,19 +15,23 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.brickulous.Database.UserSession;
+import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.textfield.TextInputEditText;
+import com.google.android.material.textview.MaterialTextView;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 
 public class LoginActivity extends AppCompatActivity {
 
-    TextView newAccount;
+    MaterialTextView newAccount;
 
-    EditText email, password;
-    Button confirmButton;
-    ImageButton googleLogin;
+    TextInputEditText email, password;
+    MaterialButton confirmButton;
+    SignInButton googleLogin;
     String emailValPattern = "[a-zA-Z0-9._-]+@[a-z-]+\\.+[a-z]+";
 
     ProgressDialog progressDialog;
@@ -54,8 +58,10 @@ public class LoginActivity extends AppCompatActivity {
         mUser = mAuth.getCurrentUser();
         UserSession.getInstance().setCurrentUser(mUser);
 
-        if (UserSession.getInstance().getCurrentUser() != null) {
-            startActivity(new Intent(getBaseContext(), MainActivity.class));
+        if (UserSession.getInstance().isUserLoggedIn()) {
+            Intent mainIntent = new Intent(LoginActivity.this, MainActivity.class);
+            mainIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
+            startActivity(mainIntent);
         } else {
             initButtons();
         }
@@ -92,6 +98,8 @@ public class LoginActivity extends AppCompatActivity {
                 if (task.isSuccessful()) {
                     progressDialog.dismiss();
                     sendUserToNextActivity();
+                    FirebaseUser user = mAuth.getCurrentUser();
+                    UserSession.getInstance().setCurrentUser(user);
                     Toast.makeText(getBaseContext(), "Login erfolgreich", Toast.LENGTH_SHORT).show();
                 } else {
                     progressDialog.dismiss();

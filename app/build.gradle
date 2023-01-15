@@ -7,6 +7,10 @@ android {
     namespace 'com.example.brickulous'
     compileSdk 32
 
+    aaptOptions {
+        cruncherEnabled = false
+    }
+
     defaultConfig {
         applicationId "com.example.brickulous"
         minSdk 29

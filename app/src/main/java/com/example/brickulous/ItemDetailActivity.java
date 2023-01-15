@@ -3,7 +3,6 @@ package com.example.brickulous;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
@@ -14,27 +13,21 @@ import android.text.method.LinkMovementMethod;
 import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 import android.widget.ToggleButton;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.example.brickulous.Adapter.SetAdapter;
 import com.example.brickulous.Api.APIGetSet;
 import com.example.brickulous.Api.LegoSetData;
 import com.example.brickulous.Database.FirebaseDatabaseInstance;
 import com.example.brickulous.Database.UserSession;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.ValueEventListener;
 
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
-import java.util.Set;
+import java.util.Objects;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class ItemDetailActivity extends AppCompatActivity {
 
@@ -112,6 +105,7 @@ public class ItemDetailActivity extends AppCompatActivity {
 
     private void initFavButton() {
         SharedPreferences sharedPreferencesToggleButtonState = getSharedPreferences("favorite_button_state" + setNumberString, MODE_PRIVATE);
+        AtomicReference<String> legoSetID = new AtomicReference<>("");
 
         boolean isChecked = sharedPreferencesToggleButtonState.getBoolean("is_checked" + setNumberString, false);
         favButton.setChecked(isChecked);
@@ -131,7 +125,6 @@ public class ItemDetailActivity extends AppCompatActivity {
             SharedPreferences.Editor editor = sharedPreferencesToggleButtonState.edit();
             editor.putBoolean("is_checked" + setNumberString, isChecked1);
             editor.apply();
-            String legoSetID = "";
 
             if (favButton.isChecked()) {
                 favButton.setBackgroundResource(R.drawable.ic_favorite_red_24);
@@ -140,7 +133,7 @@ public class ItemDetailActivity extends AppCompatActivity {
                     DatabaseReference favoritesRef = FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Users").child(UserSession.getInstance().getCurrentUser().getUid()).child("Favorites");
 
                     DatabaseReference legoSetRef = favoritesRef.push();
-                    legoSetID = legoSetRef.getKey();
+                    legoSetID.set(legoSetRef.getKey());
 
                     Map<String, Object> legoSetData = new HashMap<>();
                     legoSetData.put("Set_Number", legoSet.getSetNumb());
@@ -154,8 +147,7 @@ public class ItemDetailActivity extends AppCompatActivity {
                 if (UserSession.getInstance().getCurrentUser() != null) {
                     DatabaseReference favoritesRef = FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Users").child(UserSession.getInstance().getCurrentUser().getUid()).child("Favorites");
 
-                    DatabaseReference legoSetRef = favoritesRef.child(legoSetID);
-
+                    DatabaseReference legoSetRef = favoritesRef.child(legoSetID.get());
                     legoSetRef.removeValue();
                 }
             }
@@ -166,6 +158,7 @@ public class ItemDetailActivity extends AppCompatActivity {
 
     private void initmySetsButton() {
         SharedPreferences sharedPreferencesToggleMyButtonState = getSharedPreferences("my_sets_button_state" + setNumberString, MODE_PRIVATE);
+        AtomicReference<String> legoSetID = new AtomicReference<>("");
 
         boolean isCheckedMy = sharedPreferencesToggleMyButtonState.getBoolean("is_checked_my_sets" + setNumberString, false);
         mySetsButton.setChecked(isCheckedMy);
@@ -186,7 +179,6 @@ public class ItemDetailActivity extends AppCompatActivity {
             editor.putBoolean("is_checked_my_sets" + setNumberString, isChecked);
             editor.apply();
 
-            String legoSetID = "";
 
             if (mySetsButton.isChecked()) {
                 mySetsButton.setBackgroundResource(R.drawable.ic_baseline_inventory_2_24);
@@ -195,7 +187,7 @@ public class ItemDetailActivity extends AppCompatActivity {
                     DatabaseReference favoritesRef = FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Users").child(UserSession.getInstance().getCurrentUser().getUid()).child("My_Sets");
 
                     DatabaseReference legoSetRef = favoritesRef.push();
-                    legoSetID = legoSetRef.getKey();
+                    legoSetID.set(legoSetRef.getKey());
 
                     Map<String, Object> legoSetData = new HashMap<>();
                     legoSetData.put("Set_Number", legoSet.getSetNumb());
@@ -209,7 +201,8 @@ public class ItemDetailActivity extends AppCompatActivity {
                 if (UserSession.getInstance().getCurrentUser() != null) {
                     DatabaseReference favoritesRef = FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Users").child(UserSession.getInstance().getCurrentUser().getUid()).child("My_Sets");
 
-                    DatabaseReference legoSetRef = favoritesRef.child(legoSetID);
+                    DatabaseReference legoSetRef = favoritesRef.child(legoSetID.get());
+                    Log.d("Reference", Objects.requireNonNull(legoSetRef).toString());
 
                     legoSetRef.removeValue();
                 }

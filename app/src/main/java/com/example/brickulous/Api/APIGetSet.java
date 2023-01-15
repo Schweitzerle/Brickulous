@@ -1,6 +1,7 @@
 package com.example.brickulous.Api;
 
 import android.content.Context;
+import android.util.Log;
 import android.widget.Toast;
 
 import androidx.annotation.NonNull;
@@ -26,23 +27,25 @@ public class APIGetSet {
     Context context;
     String legoSetNumber;
 
-    public APIGetSet(@NonNull Context context, String legoSetNumber) {
+    public APIGetSet(@NonNull Context context, @NonNull String legoSetNumber) {
         this.context = context;
         this.legoSetNumber = legoSetNumber;
     }
 
 
     public void run(RequestListener listener) {
-        RequestQueue queue = Volley.newRequestQueue(context);
-        String url = REQUEST_URL.replace("{set_num}", legoSetNumber).replace("{API key}", HomeFragment.API_KEY);
-        JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
-                (Request.Method.GET, url, null, response -> {
-                    listener.onResult(getLegoSetDataFromResponse(response));
-                }, error -> {
-                    listener.onError();
+        if (legoSetNumber != null) {
+            RequestQueue queue = Volley.newRequestQueue(context);
+            String url = REQUEST_URL.replace("{set_num}", legoSetNumber).replace("{API key}", HomeFragment.API_KEY);
+            JsonObjectRequest jsonObjectRequest = new JsonObjectRequest
+                    (Request.Method.GET, url, null, response -> {
+                        listener.onResult(getLegoSetDataFromResponse(response));
+                    }, error -> {
+                        listener.onError();
 
-                });
-        queue.add(jsonObjectRequest);
+                    });
+            queue.add(jsonObjectRequest);
+        }
     }
 
     private LegoSetData getLegoSetDataFromResponse(JSONObject response) {
@@ -66,7 +69,6 @@ public class APIGetSet {
     public APIGetSet copy() {
         return new APIGetSet(context, legoSetNumber);
     }
-
 
 
     public interface RequestListener {

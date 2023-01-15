@@ -22,6 +22,8 @@ import android.widget.EditText;
 import android.widget.Spinner;
 import android.widget.Toast;
 
+import com.example.brickulous.Adapter.HighLightArrayAdapter;
+import com.example.brickulous.Animation.CustomSpinner;
 import com.example.brickulous.Animation.MyItemAnimator;
 import com.example.brickulous.Api.APIGetThemes;
 import com.example.brickulous.Api.APIRequests;
@@ -34,6 +36,7 @@ import com.example.brickulous.Database.FirebaseDatabaseInstance;
 import com.example.brickulous.Database.User;
 import com.example.brickulous.Database.UserSession;
 import com.example.brickulous.R;
+import com.google.android.material.textfield.MaterialAutoCompleteTextView;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -45,6 +48,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.lang.reflect.Field;
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -60,7 +64,7 @@ import java.util.Objects;
 import java.util.Set;
 
 
-public class HomeFragment extends Fragment {
+public class HomeFragment extends Fragment implements CustomSpinner.OnSpinnerEventsListener {
 
 
 
@@ -70,12 +74,12 @@ public class HomeFragment extends Fragment {
     public static final String API_KEY = "?key=7c5725b2fea069238e34957b71ef40a5";
 
 
-    Spinner spinner;
+    CustomSpinner spinner;
     List<LegoSetData> legoSetData;
     RecyclerView recyclerView;
-    AutoCompleteTextView setNmbr;
+    MaterialAutoCompleteTextView setNmbr;
     List<ThemeData> themeDataList = new ArrayList<>();
-
+    HighLightArrayAdapter adapter;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
@@ -140,6 +144,7 @@ public class HomeFragment extends Fragment {
     }
 
     private void setSpinner() {
+        spinner.setSpinnerEventsListener(this);
         APIGetThemes getThemes = new APIGetThemes(requireContext());
         List<String> themeNames = new ArrayList<>();
         Map<String, Integer> themeSet = new HashMap<>();
@@ -153,8 +158,8 @@ public class HomeFragment extends Fragment {
                     themeSet.put(themeData1.getName(), themeData1.getThemeID());
                 }
                 Collections.sort(themeNames);
-                ArrayAdapter<String> adapter = new ArrayAdapter<>(requireContext(), android.R.layout.simple_spinner_item, themeNames);
-                adapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+                adapter = new HighLightArrayAdapter(requireContext(), R.layout.spinner_item, themeNames);
+                adapter.setDropDownViewResource(R.layout.spinner_dropdown_item);
                 spinner.setAdapter(adapter);
             }
             @Override
@@ -167,9 +172,9 @@ public class HomeFragment extends Fragment {
             @Override
             public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
                 legoSetData.clear();
+                adapter.setSpinnerSelection(position);
                 GetSetData getSetData = new GetSetData(getContext(), recyclerView, "https://rebrickable.com/api/v3/lego/sets/" +  API_KEY + "&theme_id=" + themeSet.get(themeNames.get(position)), legoSetData);
                 getSetData.execute();
-
             }
 
             @Override
@@ -180,4 +185,16 @@ public class HomeFragment extends Fragment {
 
 
     }
+
+
+    @Override
+    public void onPopupWindowOpened(Spinner spinner) {
+        spinner.setBackground(getResources().getDrawable(R.drawable.bg_spinner_up));
+    }
+
+    @Override
+    public void onPopupWindowClosed(Spinner spinner) {
+        spinner.setBackground(getResources().getDrawable(R.drawable.bg_spinner));
+    }
+
 }

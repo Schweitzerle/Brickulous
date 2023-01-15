@@ -9,5 +9,10 @@
     <color name="white">#FFFFFFFF</color>
     <color name="orange">#e03602</color>
     <color name="dark_orange">#751604</color>
+    <color name="dark_orange_op">#99751604</color>
+    <color name="pink_op">#99FF61F4</color>
+    <color name="purple_op">#99AD61FF</color>
+    <color name="orange_op">#99FF4805</color>
+    <color name="grey">#403f3f</color>
 
 </resources>

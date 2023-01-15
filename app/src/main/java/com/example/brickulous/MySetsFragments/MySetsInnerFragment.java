@@ -1,5 +1,6 @@
 package com.example.brickulous.MySetsFragments;
 
+import android.content.Context;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -34,13 +35,14 @@ public class MySetsInnerFragment extends Fragment {
 
     private int counter = 0;
     RecyclerView recyclerView;
+    Context context;
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_my_sets_inner, container, false);
-
         recyclerView = view.findViewById(R.id.my_sets_list);
+        context = view.getContext();
 
         if (UserSession.getInstance().getCurrentUser() != null) {
             DatabaseReference favoritesRef = FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Users").child(UserSession.getInstance().getCurrentUser().getUid()).child("My_Sets");
@@ -58,35 +60,38 @@ public class MySetsInnerFragment extends Fragment {
                     String legoSetName = legoSetSnapshot.child("Set_Number").getValue(String.class);
                     mySetNames.add(legoSetName);
                 }
-
                 for (String strings : mySetNames) {
-                    APIGetSet apiGetSet = new APIGetSet(requireContext(), strings);
-                    apiGetSet.run(new APIGetSet.RequestListener() {
-                        @Override
-                        public void onResult(LegoSetData data) {
-                            mySetsLis.add(data);
-                            counter++;
-                            if (counter == mySetsLis.size()) {
-                                SetAdapter setAdapter = new SetAdapter(getContext(), mySetsLis);
-                                recyclerView.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
-                                recyclerView.setAdapter(setAdapter);
+                    if (context != null) {
+                        APIGetSet apiGetSet = new APIGetSet(context, strings);
+                        apiGetSet.run(new APIGetSet.RequestListener() {
+                            @Override
+                            public void onResult(LegoSetData data) {
+                                mySetsLis.add(data);
+                                counter++;
+                                if (counter == mySetsLis.size()) {
+                                    SetAdapter setAdapter = new SetAdapter(requireContext(), mySetsLis);
+                                    recyclerView.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
+                                    recyclerView.setAdapter(setAdapter);
+                                }
                             }
-                        }
 
-                        @Override
-                        public void onError() {
-                            Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
+                            @Override
+                            public void onError() {
+                                Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                            }
+                        });
+                    }
+                    }
+
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
                 // Handle error
             }
         });
     }
+
 
 
 }

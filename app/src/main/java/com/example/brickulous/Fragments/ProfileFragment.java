@@ -36,6 +36,9 @@ import com.example.brickulous.Database.FirebaseDatabaseInstance;
 import com.example.brickulous.Database.UserSession;
 import com.example.brickulous.LoginActivity;
 import com.example.brickulous.R;
+import com.google.android.material.button.MaterialButton;
+import com.google.android.material.imageview.ShapeableImageView;
+import com.google.android.material.textview.MaterialTextView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -50,19 +53,16 @@ import java.util.Set;
 
 public class ProfileFragment extends Fragment implements View.OnClickListener {
 
-    TextView setsOwned, setsFavored, bricksOwned, statusTextView;
-    Button signOutButton;
-    ImageView profileImage;
+    MaterialTextView setsOwned, setsFavored, bricksOwned, statusTextView;
+    MaterialButton signOutButton;
+    ShapeableImageView profileImage;
 
-    private int counterFav = 0;
-    private int counterMy = 0;
+    String name = "";
     int start = 0;
 
     List<String> favoriteSetNames = new ArrayList<>();
-    List<LegoSetData> favoriteList = new ArrayList<>();
 
     List<Integer> mySetNamesList = new ArrayList<>();
-    List<LegoSetData> mySetsLis = new ArrayList<>();
 
 
     @Override
@@ -72,17 +72,14 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
 
         initUI(view);
-        initSignIn(view);
         if (UserSession.getInstance().getCurrentUser() != null) {
+            initSignIn(view);
             DatabaseReference favoritesRef = FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Users").child(UserSession.getInstance().getCurrentUser().getUid()).child("Favorites");
             getFavorites(favoritesRef, favoriteSetNames);
+            DatabaseReference myRef = FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Users").child(UserSession.getInstance().getCurrentUser().getUid()).child("My_Sets");
+            getMySets(myRef, mySetNamesList);
         }
 
-
-        if (UserSession.getInstance().getCurrentUser() != null) {
-            DatabaseReference favoritesRef = FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Users").child(UserSession.getInstance().getCurrentUser().getUid()).child("My_Sets");
-            getMySets(favoritesRef, mySetNamesList);
-        }
         return view;
     }
 
@@ -108,7 +105,30 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                         }
                     });
         }
-        statusTextView.setText(UserSession.getInstance().getCurrentUser().getDisplayName());
+
+        if (UserSession.getInstance().getCurrentUser().getDisplayName() != null) {
+            statusTextView.setText(UserSession.getInstance().getCurrentUser().getDisplayName());
+        } else {
+            if (UserSession.getInstance().getCurrentUser() != null) {
+                DatabaseReference favoritesRef = FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Users").child(UserSession.getInstance().getCurrentUser().getUid()).child("User");
+
+                favoritesRef.addValueEventListener(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        name = "";
+                        for (DataSnapshot legoSetSnapshot : dataSnapshot.getChildren()) {
+                            name = legoSetSnapshot.child("User_Name").getValue(String.class);
+                        }
+                        statusTextView.setText(name);
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                        // Handle error
+                    }
+                });
+            }
+        }
     }
 
     private void getMySets(DatabaseReference myReference, final List<Integer> mySetNames) {
@@ -156,24 +176,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     favoriteSetNames.add(legoSetName);
 
                 }
-                for (String strings : favoriteSetNames) {
-                    APIGetSet apiGetSet = new APIGetSet(requireContext(), strings);
-                    apiGetSet.run(new APIGetSet.RequestListener() {
-                        @Override
-                        public void onResult(LegoSetData data) {
-                            favoriteList.add(data);
-                            counterFav++;
-                            if (counterFav == favoriteList.size()) {
-                                initFavAnim(favoriteSetNames);
-                            }
-                        }
-
-                        @Override
-                        public void onError() {
-                            Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
-                        }
-                    });
-                }
+                initFavAnim(favoriteSetNames);
             }
 
             @Override

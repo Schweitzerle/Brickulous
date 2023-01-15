@@ -46,12 +46,10 @@ public class FavoritesFragment extends Fragment {
         View view = inflater.inflate(R.layout.fragment_favorites, container, false);
         recyclerView = view.findViewById(R.id.favorite_list);
 
-
         if (UserSession.getInstance().getCurrentUser() != null) {
             DatabaseReference favoritesRef = FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Users").child(UserSession.getInstance().getCurrentUser().getUid()).child("Favorites");
             getFavorites(favoritesRef, favoriteSetNames);
         }
-
         return view;
     }
 
@@ -59,12 +57,11 @@ public class FavoritesFragment extends Fragment {
     private void getFavorites(DatabaseReference favoritesRef, final List<String> favoriteSetNames) {
         favoritesRef.addValueEventListener(new ValueEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 favoriteSetNames.clear();
                 for (DataSnapshot legoSetSnapshot : dataSnapshot.getChildren()) {
                     String legoSetName = legoSetSnapshot.child("Set_Number").getValue(String.class);
                     favoriteSetNames.add(legoSetName);
-
                 }
                 for (String strings : favoriteSetNames) {
                     APIGetSet apiGetSet = new APIGetSet(requireContext(), strings);
@@ -74,7 +71,7 @@ public class FavoritesFragment extends Fragment {
                             favoriteList.add(data);
                             counter++;
                             if (counter == favoriteList.size()) {
-                                SetAdapter setAdapter = new SetAdapter(getContext(), favoriteList);
+                                SetAdapter setAdapter = new SetAdapter(requireContext(), favoriteList);
                                 recyclerView.setLayoutManager(new StaggeredGridLayoutManager(1, StaggeredGridLayoutManager.VERTICAL));
                                 recyclerView.setAdapter(setAdapter);
                             }
@@ -82,14 +79,15 @@ public class FavoritesFragment extends Fragment {
 
                         @Override
                         public void onError() {
-                            Toast.makeText(getContext(), "Error", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(requireContext(), "Error", Toast.LENGTH_SHORT).show();
                         }
                     });
+
                 }
             }
 
             @Override
-            public void onCancelled(DatabaseError databaseError) {
+            public void onCancelled(@NonNull DatabaseError databaseError) {
                 // Handle error
             }
         });

@@ -18,6 +18,10 @@ public class UserSession {
         return instance;
     }
 
+    public boolean isUserLoggedIn() {
+        return getCurrentUser() != null;
+    }
+
     public FirebaseUser getCurrentUser() {
         return currentUser;
     }

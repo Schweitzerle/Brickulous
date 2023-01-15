@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.brickulous.Database.UserSession;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.api.identity.SignInCredential;
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
@@ -87,6 +88,7 @@ public class LoginGoogleActivity extends LoginActivity {
                         if (task.isSuccessful()) {
                             progressDialog.dismiss();
                             FirebaseUser user = mAuth.getCurrentUser();
+                            UserSession.getInstance().setCurrentUser(user);
                             updateUI(user);
                         } else {
                             progressDialog.dismiss();
