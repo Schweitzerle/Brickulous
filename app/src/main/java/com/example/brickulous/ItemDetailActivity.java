@@ -4,13 +4,14 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.os.Vibrator;
 import android.text.Html;
 import android.text.method.LinkMovementMethod;
-import android.util.Log;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.ToggleButton;
@@ -26,8 +27,9 @@ import com.google.firebase.database.DatabaseReference;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 import java.util.concurrent.atomic.AtomicReference;
+
+import io.github.muddz.styleabletoast.StyleableToast;
 
 public class ItemDetailActivity extends AppCompatActivity {
 
@@ -38,6 +40,9 @@ public class ItemDetailActivity extends AppCompatActivity {
     ToggleButton favButton, mySetsButton;
     String setNumberString;
     LegoSetData legoSet = new LegoSetData();
+    long[] pattern = {0, 200, 300, 400, 500};
+    long[] pattern2 = {0, 400, 500, 200, 300};
+
 
 
 
@@ -140,6 +145,11 @@ public class ItemDetailActivity extends AppCompatActivity {
                     legoSetData.put("Name", legoSet.getName());
                     legoSetData.put("Number_Of_Bricks", legoSet.getNumbOfParts());
                     legoSetRef.setValue(legoSetData);
+
+                    Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                    vibrator.vibrate(pattern, -1);
+
+                    StyleableToast.makeText(getApplicationContext(), "Favorit erfolgreich hinzugefügt!", R.style.customToastAddFav).show();
                 }
             } else {
                 favButton.setBackgroundResource(R.drawable.ic_favorite_24);
@@ -149,6 +159,11 @@ public class ItemDetailActivity extends AppCompatActivity {
 
                     DatabaseReference legoSetRef = favoritesRef.child(legoSetID.get());
                     legoSetRef.removeValue();
+
+                    Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                    vibrator.vibrate(pattern2, -1);
+
+                    StyleableToast.makeText(getApplicationContext(), "Favorit erfolgreich entfernt!", R.style.customToastRemFav).show();
                 }
             }
         });
@@ -194,6 +209,12 @@ public class ItemDetailActivity extends AppCompatActivity {
                     legoSetData.put("Name", legoSet.getName());
                     legoSetData.put("Number_Of_Bricks", legoSet.getNumbOfParts());
                     legoSetRef.setValue(legoSetData);
+
+                    Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                    vibrator.vibrate(pattern, -1);
+
+                    StyleableToast.makeText(getApplicationContext(), "Mein Set erfolgreich hinzugefügt!", R.style.customToastAddMy).show();
+
                 }
             } else {
                 mySetsButton.setBackgroundResource(R.drawable.ic_inventory_2_24);
@@ -202,9 +223,14 @@ public class ItemDetailActivity extends AppCompatActivity {
                     DatabaseReference favoritesRef = FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Users").child(UserSession.getInstance().getCurrentUser().getUid()).child("My_Sets");
 
                     DatabaseReference legoSetRef = favoritesRef.child(legoSetID.get());
-                    Log.d("Reference", Objects.requireNonNull(legoSetRef).toString());
 
                     legoSetRef.removeValue();
+
+                    Vibrator vibrator = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                    vibrator.vibrate(pattern2, -1);
+
+                    StyleableToast.makeText(getApplicationContext(), "Mein Set erfolgreich entfernt!", R.style.customToastRemMy).show();
+
                 }
             }
         });

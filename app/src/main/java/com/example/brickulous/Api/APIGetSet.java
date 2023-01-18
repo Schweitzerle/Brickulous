@@ -22,7 +22,7 @@ import java.util.Set;
 
 public class APIGetSet {
 
-    private static final String REQUEST_URL = "https://rebrickable.com/api/v3/lego/sets/{set_num}{API key}";
+    private static final String REQUEST_URL = "https://rebrickable.com/api/v3/lego/sets/{set_num}{API key}&page_size=1000";
 
     Context context;
     String legoSetNumber;

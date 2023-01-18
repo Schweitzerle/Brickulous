@@ -10,6 +10,7 @@ import android.os.Bundle;
 import android.util.Log;
 import android.widget.Toast;
 
+import com.example.brickulous.Database.FirebaseDatabaseInstance;
 import com.example.brickulous.Database.UserSession;
 import com.google.android.gms.auth.GoogleAuthException;
 import com.google.android.gms.auth.api.identity.SignInCredential;
@@ -25,6 +26,16 @@ import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.auth.GoogleAuthProvider;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Objects;
+
+import io.github.muddz.styleabletoast.StyleableToast;
 
 public class LoginGoogleActivity extends LoginActivity {
 
@@ -33,6 +44,8 @@ public class LoginGoogleActivity extends LoginActivity {
 
     FirebaseAuth mAuth;
     FirebaseUser mUser;
+
+    String name;
 
     ProgressDialog progressDialog;
 
@@ -89,6 +102,35 @@ public class LoginGoogleActivity extends LoginActivity {
                             progressDialog.dismiss();
                             FirebaseUser user = mAuth.getCurrentUser();
                             UserSession.getInstance().setCurrentUser(user);
+                            DatabaseReference favoritesRef = FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Users").child(UserSession.getInstance().getCurrentUser().getUid()).child("User");
+
+                            DatabaseReference legoSetRef = favoritesRef.push();
+
+                            if (UserSession.getInstance().getCurrentUser() != null) {
+                                favoritesRef.addValueEventListener(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        name = "";
+                                        for (DataSnapshot legoSetSnapshot : dataSnapshot.getChildren()) {
+                                            name = legoSetSnapshot.child("User_Name").getValue(String.class);
+                                        }
+                                        assert name != null;
+                                        if (!name.equals(Objects.requireNonNull(UserSession.getInstance().getCurrentUser().getDisplayName()))) {
+                                            Map<String, Object> userData = new HashMap<>();
+                                            assert user != null;
+                                            userData.put("User_Name", Objects.requireNonNull(user.getDisplayName()));
+                                            legoSetRef.setValue(userData);
+                                        }
+                                        StyleableToast.makeText(getBaseContext(), "Willkommen " + name + "!", R.style.customToastLoggedIn).show();
+
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+                                    }
+                                });
+                            }
+
                             updateUI(user);
                         } else {
                             progressDialog.dismiss();

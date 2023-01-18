@@ -14,6 +14,7 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.brickulous.Database.FirebaseDatabaseInstance;
 import com.example.brickulous.Database.UserSession;
 import com.google.android.gms.common.SignInButton;
 import com.google.android.gms.tasks.OnCompleteListener;
@@ -24,6 +25,12 @@ import com.google.android.material.textview.MaterialTextView;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.ValueEventListener;
+
+import io.github.muddz.styleabletoast.StyleableToast;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -38,6 +45,8 @@ public class LoginActivity extends AppCompatActivity {
 
     FirebaseAuth mAuth;
     FirebaseUser mUser;
+
+    String name;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -100,7 +109,28 @@ public class LoginActivity extends AppCompatActivity {
                     sendUserToNextActivity();
                     FirebaseUser user = mAuth.getCurrentUser();
                     UserSession.getInstance().setCurrentUser(user);
-                    Toast.makeText(getBaseContext(), "Login erfolgreich", Toast.LENGTH_SHORT).show();
+
+                    if (UserSession.getInstance().getCurrentUser() != null) {
+                        DatabaseReference favoritesRef = FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Users").child(UserSession.getInstance().getCurrentUser().getUid()).child("User");
+
+                        favoritesRef.addValueEventListener(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                name = "";
+                                for (DataSnapshot legoSetSnapshot : dataSnapshot.getChildren()) {
+                                    name = legoSetSnapshot.child("User_Name").getValue(String.class);
+                                    StyleableToast.makeText(getBaseContext(), "Wilkommen " + name + "!", R.style.customToastLoggedIn).show();
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+                                // Handle error
+                            }
+                        });
+                    }
+
+
                 } else {
                     progressDialog.dismiss();
                     Toast.makeText(getBaseContext(), "Login fehlgeschlagen:" + task.getException(), Toast.LENGTH_SHORT).show();

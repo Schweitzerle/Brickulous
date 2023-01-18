@@ -1,37 +1,21 @@
 package com.example.brickulous.Fragments;
 
-import static android.content.Context.MODE_PRIVATE;
-
-import static com.example.brickulous.Fragments.HomeFragment.API_KEY;
-
 import android.animation.ValueAnimator;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.graphics.Bitmap;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.ImageView;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
-import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.request.target.CustomTarget;
 import com.bumptech.glide.request.transition.Transition;
-import com.example.brickulous.Adapter.SetAdapter;
-import com.example.brickulous.Api.APIGetSet;
-import com.example.brickulous.Api.APIRequests;
-import com.example.brickulous.Api.GetSetByNumberPlaneData;
-import com.example.brickulous.Api.LegoSetData;
 import com.example.brickulous.Database.FirebaseDatabaseInstance;
 import com.example.brickulous.Database.UserSession;
 import com.example.brickulous.LoginActivity;
@@ -46,14 +30,14 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
+
+import io.github.muddz.styleabletoast.StyleableToast;
 
 
 public class ProfileFragment extends Fragment implements View.OnClickListener {
 
-    MaterialTextView setsOwned, setsFavored, bricksOwned, statusTextView;
+    MaterialTextView setsOwned, setsFavored, bricksOwned, statusTextView, emailTextView;
     MaterialButton signOutButton;
     ShapeableImageView profileImage;
 
@@ -85,8 +69,9 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
     private void initSignIn(View view) {
         profileImage = view.findViewById(R.id.user_profile);
-        statusTextView = view.findViewById(R.id.status_text_view);
+        statusTextView = view.findViewById(R.id.name_view);
         signOutButton = view.findViewById(R.id.sign_out_button);
+        emailTextView = view.findViewById(R.id.email_text_view);
 
         signOutButton.setOnClickListener(this);
 
@@ -106,9 +91,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     });
         }
 
-        if (UserSession.getInstance().getCurrentUser().getDisplayName() != null) {
-            statusTextView.setText(UserSession.getInstance().getCurrentUser().getDisplayName());
-        } else {
+
             if (UserSession.getInstance().getCurrentUser() != null) {
                 DatabaseReference favoritesRef = FirebaseDatabaseInstance.getInstance().getFirebaseDatabase().getReference("Users").child(UserSession.getInstance().getCurrentUser().getUid()).child("User");
 
@@ -120,6 +103,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                             name = legoSetSnapshot.child("User_Name").getValue(String.class);
                         }
                         statusTextView.setText(name);
+                        emailTextView.setText(UserSession.getInstance().getCurrentUser().getEmail());
                     }
 
                     @Override
@@ -128,7 +112,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
                     }
                 });
             }
-        }
+
     }
 
     private void getMySets(DatabaseReference myReference, final List<Integer> mySetNames) {
@@ -239,6 +223,7 @@ public class ProfileFragment extends Fragment implements View.OnClickListener {
 
     private void signOut() {
         FirebaseAuth.getInstance().signOut();
+        StyleableToast.makeText(requireContext(), "Auf Wiedersehen " + name + "!", R.style.customToastLoggedIn).show();
         startActivity(new Intent(getContext(), LoginActivity.class));
     }
 
