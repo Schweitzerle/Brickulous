@@ -1,4 +1,4 @@
-package com.example.brickulous.Fragments;
+atupackage com.example.brickulous.Fragments;
 
 import android.os.Bundle;
 

@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".Fragments.HomeFragment">
+
+    <com.google.android.material.imageview.ShapeableImageView
+        android:id="@+id/transparent_lego_design"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/legofall"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <com.google.android.material.textfield.MaterialAutoCompleteTextView
+        android:id="@+id/edit_text"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginHorizontal="5dp"
+        android:layout_marginTop="30dp"
+        android:background="@drawable/bg_statistics"
+        android:hint="Setnummer..."
+        android:padding="10dp"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textColorHint="@color/black"
+        android:textSize="40dp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/transparent_lego_design" />
+
+    <com.google.android.material.textview.MaterialTextView
+        android:id="@+id/number_sets"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="@id/theme_spinner"
+        app:layout_constraintBottom_toBottomOf="@id/theme_spinner"
+        app:layout_constraintEnd_toStartOf="@id/theme_spinner"
+        android:layout_marginHorizontal="5dp"
+        android:background="@drawable/rounded_corners_dark_orange"
+        android:padding="10dp"
+        android:text="33"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textColorHint="@color/black"
+        android:textSize="20dp"
+        android:textStyle="bold"/>
+
+
+    <com.example.brickulous.Animation.CustomSpinner
+        android:id="@+id/theme_spinner"
+        android:layout_width="0dp"
+        android:layout_height="60dp"
+        android:layout_marginHorizontal="10dp"
+        android:layout_marginTop="10dp"
+        android:background="@drawable/bg_spinner"
+        android:dropDownWidth="300dp"
+        android:dropDownVerticalOffset="60dp"
+        android:popupBackground="@drawable/bg_spinner_dropdown"
+        android:prompt="@string/spinner_default"
+        app:layout_constraintWidth_percent=".7"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/edit_text" />
+
+
+    <androidx.recyclerview.widget.RecyclerView
+        android:id="@+id/setList"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginHorizontal="20dp"
+        android:layout_marginTop="40sp"
+        android:layout_marginBottom="70dp"
+        android:layoutAnimation="@anim/layput_animation"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/theme_spinner" />
+
+</androidx.constraintlayout.widget.ConstraintLayout>
